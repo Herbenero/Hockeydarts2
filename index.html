@@ -1,346 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hellcastle Rating (HR)</title>
-
-  <!-- Basic favicon (multi-resolution .ico) -->
-  <link rel="icon" type="image/x-icon" href="PATH_TO/favicon.ico" />
-
-  <!-- PNG favicons for modern browsers / sizes -->
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="PATH_TO/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="48x48" href="PATH_TO/favicon-48x48.png" />
-
-  <!-- Apple / iOS touch icon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="PATH_TO/apple-touch-icon.png" />
-
-  <!-- Android / Web app manifest -->
-  <link rel="manifest" href="PATH_TO/site.webmanifest" />
-
-  <!-- Windows / pinned site -->
-  <meta name="msapplication-TileColor" content="#ef4444" />
-  <meta name="msapplication-TileImage" content="PATH_TO/mstile-144x144.png" />
-
-  <!-- Browser UI theme color -->
-  <meta name="theme-color" content="#ef4444" />
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { background-color: #0f172a; color: #f8fafc; }
-    .card { background-color: #1e293b; border: 1px solid #334155; }
-    .accent { color: #ef4444; }
-    .btn-primary { background-color: #ef4444; transition: all 0.2s; }
-    .btn-primary:hover { background-color: #dc2626; transform: translateY(-1px); }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    ::-webkit-calendar-picker-indicator { filter: invert(1); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hellcastle Rating (HR) Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+        .card { background-color: #1e293b; border: 1px solid #334155; }
+        .accent { color: #ef4444; }
+        .btn-primary { background-color: #ef4444; transition: all 0.2s; }
+        .btn-primary:hover { background-color: #dc2626; transform: translateY(-1px); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        ::-webkit-calendar-picker-indicator { filter: invert(1); }
+    </style>
 </head>
 <body class="p-4 md:p-8">
-  <div class="max-w-6xl mx-auto">
-    <header class="mb-8 text-center">
-      <h1 class="text-4xl font-black tracking-tighter uppercase italic">
-        Hellcastle <span class="accent">Rating</span>
-      </h1>
-      <p class="text-slate-400">Match History & Multiplayer Tracker</p>
-    </header>
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-black tracking-tighter uppercase italic">Hellcastle <span class="accent">Rating</span></h1>
+            <p class="text-slate-400">Match History & Multiplayer Tracker</p>
+        </header>
 
-    <!-- UNIFIED GRID: Record Match + Leaderboard + Match History -->
-    <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
-      <!-- Record Match -->
-      <section class="lg:col-span-2 card p-6 rounded-xl shadow-xl">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold italic uppercase tracking-wider">⚔️ Record Match</h2>
-          <div class="flex gap-2">
-            <input
-              type="date"
-              id="matchDate"
-              class="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs focus:outline-none focus:border-red-500"
-            />
-            <button
-              type="button"
-              onclick="addPlayerRow()"
-              class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full border border-slate-500 transition-colors"
-            >
-              + Player
-            </button>
-          </div>
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Input Form -->
+            <section class="lg:col-span-2 space-y-8">
+                <div class="card p-6 rounded-xl shadow-xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold italic uppercase tracking-wider">⚔️ Record Match</h2>
+                        <div class="flex gap-2">
+                            <input type="date" id="matchDate" class="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs focus:outline-none focus:border-red-500">
+                            <button type="button" onclick="addPlayerRow()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-full border border-slate-500 transition-colors">+ Player</button>
+                        </div>
+                    </div>
+                    
+                    <form id="matchForm" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Game Played</label>
+                                <input type="text" id="gameName" placeholder="e.g. Catan, Golf, Poker" required class="w-full bg-slate-800 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Win Condition</label>
+                                <select id="winCondition" class="w-full bg-slate-800 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
+                                    <option value="high">High Score Wins</option>
+                                    <option value="low">Low Score Wins</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="playerRows" class="space-y-3 mb-6">
+                            <!-- Rows added by JS -->
+                        </div>
+                        <button type="submit" class="w-full btn-primary text-white font-bold py-4 rounded-lg uppercase tracking-widest">Process Match Results</button>
+                    </form>
+                </div>
+
+                <!-- Match History -->
+                <div class="card p-6 rounded-xl shadow-xl">
+                    <h2 class="text-xl font-bold mb-4 italic uppercase">📜 Match History</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="text-slate-500 text-xs uppercase border-b border-slate-700">
+                                    <th class="pb-2">Date</th>
+                                    <th class="pb-2">Game</th>
+                                    <th class="pb-2">Result Summary</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody" class="divide-y divide-slate-800">
+                                <!-- History items -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leaderboard -->
+            <section class="card p-6 rounded-xl shadow-xl h-fit sticky top-8">
+                <h2 class="text-xl font-bold mb-4 italic uppercase">🏆 HR Leaderboard</h2>
+                <div class="overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-500 text-xs uppercase border-b border-slate-700">
+                                <th class="pb-2">Player</th>
+                                <th class="pb-2 text-right">HR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBody" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+                <div id="emptyState" class="text-center py-8 text-slate-500 italic">No rankings yet.</div>
+                <button onclick="resetData()" class="mt-6 w-full text-[10px] uppercase text-slate-600 hover:text-red-400">Clear All Data</button>
+            </section>
         </div>
-
-        <form id="matchForm" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Game Played</label>
-              <input
-                type="text"
-                id="gameName"
-                placeholder="e.g. Catan, Golf, Poker"
-                required
-                class="w-full bg-slate-800 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500"
-              />
-            </div>
-            <div>
-              <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Win Condition</label>
-              <select
-                id="winCondition"
-                class="w-full bg-slate-800 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500"
-              >
-                <option value="high">High Score Wins</option>
-                <option value="low">Low Score Wins</option>
-                <option value="place">Lowest Place Wins (1st Wins)</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="playerRows" class="space-y-3 mb-6">
-            <!-- Rows dynamically populated by JavaScript -->
-          </div>
-
-          <button
-            type="submit"
-            id="submitBtn"
-            class="w-full btn-primary text-white font-bold py-4 rounded-lg uppercase tracking-widest"
-          >
-            Process Match Results
-          </button>
-        </form>
-      </section>
-
-      <!-- Leaderboard -->
-      <section class="lg:col-span-1 card p-6 rounded-xl shadow-xl h-fit lg:sticky lg:top-8">
-        <h2 class="text-xl font-bold mb-4 italic uppercase">🏆 HR Leaderboard</h2>
-        <div class="overflow-hidden">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="text-slate-500 text-xs uppercase border-b border-slate-700">
-                <th class="pb-2">Player</th>
-                <th class="pb-2 text-right">HR</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboardBody" class="divide-y divide-slate-800"></tbody>
-          </table>
-        </div>
-        <div id="emptyState" class="text-center py-8 text-slate-500 italic">No rankings yet.</div>
-      </section>
-
-      <!-- Match History -->
-      <section class="lg:col-span-3 card p-6 rounded-xl shadow-xl">
-        <h2 class="text-xl font-bold mb-4 italic uppercase">📜 Match History</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead>
-              <tr class="text-slate-500 text-xs uppercase border-b border-slate-700">
-                <th class="pb-2">Date</th>
-                <th class="pb-2">Game</th>
-                <th class="pb-2">Result Summary</th>
-              </tr>
-            </thead>
-            <tbody id="historyBody" class="divide-y divide-slate-800">
-              <tr>
-                <td colspan="3" class="text-center py-4 text-slate-500">Loading matches from cloud...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
     </div>
-  </div>
 
-  <script>
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwGPOZhC-PRsuwt-wZ70QRxnZLExtnVROtRpJx8jLqniyM79DxMVFsFkKqVHHMWOiVmkg/exec";
-    const K = 30;
+    <script>
+        const K = 30;
+        let players = JSON.parse(localStorage.getItem('hr_v3_players')) || {};
+        let history = JSON.parse(localStorage.getItem('hr_v3_history')) || [];
 
-    let players = {};
-    let matchHistory = [];
-
-    document.getElementById('matchDate').valueAsDate = new Date();
-
-    function addPlayerRow() {
-      const container = document.getElementById('playerRows');
-      const row = document.createElement('div');
-      row.className = "grid grid-cols-12 gap-3 items-center player-row animate-in fade-in slide-in-from-left-2 duration-200";
-      row.innerHTML = `
-        <div class="col-span-7">
-          <input type="text" placeholder="Player Name" required class="p-name w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
-        </div>
-        <div class="col-span-4">
-          <input type="number" placeholder="Score / Place" required class="p-score w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500 text-center">
-        </div>
-        <div class="col-span-1 text-right">
-          <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-slate-500 hover:text-red-500 text-xl">&times;</button>
-        </div>
-      `;
-      container.appendChild(row);
-    }
-
-    function getExpectedScore(ra, rb) {
-      return 1 / (1 + Math.pow(10, (rb - ra) / 400));
-    }
-
-    async function loadMatchesFromCloud() {
-      try {
-        const response = await fetch(SHEET_API_URL);
-        const rawMatches = await response.json();
-
-        // Process chronologically to properly scale historical Elo progression
-        rawMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        players = {};
-        matchHistory = [];
-
-        rawMatches.forEach(match => {
-          const numPlayers = match.results.length;
-          const ratingChanges = {};
-
-          match.results.forEach(p => {
-            ratingChanges[p.name] = 0;
-            if (!players[p.name]) players[p.name] = 1000;
-          });
-
-          // Evaluate multiplayer groups as independent head-to-head pairings
-      for (let i = 0; i < numPlayers; i++) {
-        for (let j = i + 1; j < numPlayers; j++) {
-          const p1 = match.results[i];
-          const p2 = match.results[j];
-          const r1 = players[p1.name];
-          const r2 = players[p2.name];
-          const ea = getExpectedScore(r1, r2);
-          
-          let outcome;
-          if (p1.score === p2.score) {
-            outcome = 0.5;
-          } else {
-            if (match.winCondition === 'high') {
-              outcome = (p1.score > p2.score) ? 1 : 0;
-            } else if (match.winCondition === 'low' || match.winCondition === 'place') {
-              outcome = (p1.score < p2.score) ? 1 : 0;
-            }
-          }
-
-          // 1. Calculate the absolute score difference
-          const scoreDiff = Math.abs(p1.score - p2.score);
-          
-          // 2. Apply logarithmic margin of victory multiplier with a hard cap of 3.0
-          const movMultiplier = Math.min(Math.log(scoreDiff + 1), 3.0);
-
-          // 3. Scale the winChange update using the multiplier
-          let winChange = (K / (numPlayers - 1)) * movMultiplier * (outcome - ea);
-          
-          ratingChanges[p1.name] += winChange;
-          ratingChanges[p2.name] -= winChange;
-        }
-      }
-
-          for (const name in ratingChanges) {
-            players[name] = Math.round(players[name] + ratingChanges[name]);
-          }
-
-          // Sort history views correctly based on custom rule mechanics
-          const sortedResults = [...match.results].sort((a, b) => {
-            if (match.winCondition === 'high') return b.score - a.score;
-            return a.score - b.score;
-          });
-
-          const summary = sortedResults.map(p => `${p.name} (${p.score})`).join(", ");
-          matchHistory.unshift({ date: match.date, game: match.gameName, summary });
-        });
-
-        renderAll();
-      } catch (err) {
-        console.error("Cloud fetch failed:", err);
-        document.getElementById('historyBody').innerHTML = `<tr><td colspan="3" class="text-center py-4 text-red-400">Error syncing storage online.</td></tr>`;
-      }
-    }
-
-    function renderAll() {
-      renderLeaderboard();
-      renderHistory();
-    }
-
-    function renderLeaderboard() {
-      const tbody = document.getElementById('leaderboardBody');
-      const empty = document.getElementById('emptyState');
-      tbody.innerHTML = '';
-      const sorted = Object.entries(players).sort((a, b) => b[1] - a[1]);
-
-      if (sorted.length > 0) {
-        empty.classList.add('hidden');
-        sorted.forEach(([name, hr]) => {
-          tbody.innerHTML += `<tr><td class="py-3 font-medium">${name}</td><td class="py-3 text-right font-bold accent">${hr}</td></tr>`;
-        });
-      } else {
-        empty.classList.remove('hidden');
-      }
-    }
-
-    function renderHistory() {
-      const tbody = document.getElementById('historyBody');
-      if (matchHistory.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-500">No matches found.</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = matchHistory.map(item => `
-        <tr class="hover:bg-slate-800/50 transition-colors">
-          <td class="py-3 font-mono text-xs text-slate-400">${item.date}</td>
-          <td class="py-3 font-bold text-slate-300">${item.game || 'N/A'}</td>
-          <td class="py-3 text-slate-400 text-xs">${item.summary}</td>
-        </tr>
-      `).join('');
-    }
-
-    document.getElementById('matchForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const submitBtn = document.getElementById('submitBtn');
-
-      const date = document.getElementById('matchDate').value;
-      const gameName = document.getElementById('gameName').value.trim();
-      const winCondition = document.getElementById('winCondition').value;
-      const names = Array.from(document.querySelectorAll('.p-name')).map(i => i.value.trim());
-      const scores = Array.from(document.querySelectorAll('.p-score')).map(i => parseFloat(i.value));
-
-      if (names.length < 2) { alert("Enter at least 2 players."); return; }
-      if (new Set(names).size !== names.length) { alert("Duplicate player names detected."); return; }
-
-      submitBtn.disabled = true;
-      submitBtn.innerText = "SAVING TO CLOUD...";
-
-      const payload = {
-        date,
-        gameName,
-        winCondition,
-        results: names.map((name, i) => ({ name, score: scores[i] }))
-      };
-
-      try {
-        await fetch(SHEET_API_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        document.getElementById('gameName').value = '';
-        document.getElementById('playerRows').innerHTML = '';
         document.getElementById('matchDate').valueAsDate = new Date();
-        addPlayerRow();
-        addPlayerRow();
 
-        await loadMatchesFromCloud();
-      } catch (err) {
-        alert("Could not connect to online storage server.");
-        console.error(err);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "PROCESS MATCH RESULTS";
-      }
-    });
+        function addPlayerRow() {
+            const container = document.getElementById('playerRows');
+            const row = document.createElement('div');
+            row.className = "grid grid-cols-12 gap-3 items-center player-row animate-in fade-in slide-in-from-left-2 duration-200";
+            row.innerHTML = `
+                <div class="col-span-7">
+                    <input type="text" placeholder="Player Name" required class="p-name w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
+                </div>
+                <div class="col-span-4">
+                    <input type="number" placeholder="Score" required class="p-score w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500 text-center">
+                </div>
+                <div class="col-span-1 text-right">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-slate-500 hover:text-red-500 text-xl">&times;</button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
 
-    // Initialize application layout
-    addPlayerRow();
-    addPlayerRow();
-    loadMatchesFromCloud();
-  </script>
+        function getExpectedScore(ra, rb) {
+            return 1 / (1 + Math.pow(10, (rb - ra) / 400));
+        }
+
+        function processMatch(matchResults, date, gameName, winCondition) {
+            // Sort for history summary display (still useful to see who "won")
+            const sortedResults = [...matchResults].sort((a, b) => 
+                winCondition === 'high' ? b.score - a.score : a.score - b.score
+            );
+
+            const numPlayers = matchResults.length;
+            const ratingChanges = {};
+            matchResults.forEach(p => ratingChanges[p.name] = 0);
+
+            for (let i = 0; i < numPlayers; i++) {
+                for (let j = i + 1; j < numPlayers; j++) {
+                    const p1 = matchResults[i];
+                    const p2 = matchResults[j];
+                    
+                    const ea = getExpectedScore(p1.currentRating, p2.currentRating);
+                    
+                    let outcome;
+                    if (p1.score === p2.score) {
+                        outcome = 0.5;
+                    } else {
+                        if (winCondition === 'high') {
+                            outcome = (p1.score > p2.score) ? 1 : 0;
+                        } else {
+                            outcome = (p1.score < p2.score) ? 1 : 0;
+                        }
+                    }
+
+                    let winChange = (K / (numPlayers - 1)) * (outcome - ea);
+                    ratingChanges[p1.name] += winChange;
+                    ratingChanges[p2.name] -= winChange;
+                }
+            }
+
+            for (const name in ratingChanges) {
+                players[name] = Math.round((players[name] || 1000) + ratingChanges[name]);
+            }
+
+            const summary = sortedResults.map(p => `${p.name} (${p.score})`).join(", ");
+            history.unshift({ date, game: gameName, summary });
+
+            localStorage.setItem('hr_v3_players', JSON.stringify(players));
+            localStorage.setItem('hr_v3_history', JSON.stringify(history));
+            renderAll();
+        }
+
+        function renderAll() {
+            renderLeaderboard();
+            renderHistory();
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            const empty = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+            const sorted = Object.entries(players).sort((a, b) => b[1] - a[1]);
+            if (sorted.length > 0) {
+                empty.classList.add('hidden');
+                sorted.forEach(([name, hr]) => {
+                    tbody.innerHTML += `<tr><td class="py-3 font-medium">${name}</td><td class="py-3 text-right font-bold accent">${hr}</td></tr>`;
+                });
+            } else {
+                empty.classList.remove('hidden');
+            }
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = history.map(item => `
+                <tr class="hover:bg-slate-800/50 transition-colors">
+                    <td class="py-3 font-mono text-xs text-slate-400">${item.date}</td>
+                    <td class="py-3 font-bold text-slate-300">${item.game || 'N/A'}</td>
+                    <td class="py-3 text-slate-400 text-xs">${item.summary}</td>
+                </tr>
+            `).join('');
+        }
+
+        function resetData() {
+            if (confirm("Permanently delete all ratings and match history?")) {
+                players = {};
+                history = [];
+                localStorage.clear();
+                renderAll();
+            }
+        }
+
+        document.getElementById('matchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const date = document.getElementById('matchDate').value;
+            const gameName = document.getElementById('gameName').value.trim();
+            const winCondition = document.getElementById('winCondition').value;
+            const names = Array.from(document.querySelectorAll('.p-name')).map(i => i.value.trim());
+            const scores = Array.from(document.querySelectorAll('.p-score')).map(i => parseFloat(i.value));
+            
+            if (names.length < 2) { alert("Enter at least 2 players."); return; }
+            if (new Set(names).size !== names.length) { alert("Duplicate player names detected."); return; }
+
+            const results = names.map((name, i) => ({
+                name, score: scores[i], currentRating: players[name] || 1000
+            }));
+
+            processMatch(results, date, gameName, winCondition);
+            
+            // UI Reset
+            document.getElementById('gameName').value = '';
+            document.getElementById('playerRows').innerHTML = '';
+            document.getElementById('matchDate').valueAsDate = new Date();
+            addPlayerRow(); addPlayerRow();
+        });
+
+        addPlayerRow(); addPlayerRow();
+        renderAll();
+    </script>
 </body>
 </html>
