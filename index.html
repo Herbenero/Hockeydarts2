@@ -275,65 +275,63 @@
         }
 
         document.getElementById('matchForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const date = document.getElementById('matchDate').value;
-  const gameName = document.getElementById('gameName').value.trim();
-  const winCondition = document.getElementById('winCondition').value;
-  const names = Array.from(document.querySelectorAll('.p-name')).map(i => i.value.trim());
-  
-  if (names.length < 2) {
-    alert("Enter at least 2 players.");
-    return;
-  }
-  if (new Set(names).size !== names.length) {
-    alert("Duplicate player names detected.");
-    return;
-  }
+    e.preventDefault();
+    const date = document.getElementById('matchDate').value;
+    const gameName = document.getElementById('gameName').value.trim();
+    const winCondition = document.getElementById('winCondition').value;
+    const names = Array.from(document.querySelectorAll('.p-name')).map(i => i.value.trim());
 
-  let scores = [];
-  if (winCondition === 'noscore') {
-    const winnerRadio = document.querySelector('.p-winner:checked');
-    if (!winnerRadio) {
-      alert("Please select a winner.");
+    if (names.length < 2) {
+      alert("Enter at least 2 players.");
       return;
     }
-    
-    // Assign score 1 to the winner, and 0 to losers
-    const rows = document.querySelectorAll('.player-row');
-    rows.forEach(row => {
-      const isWinner = row.querySelector('.p-winner').checked;
-      scores.push(isWinner ? 1 : 0);
-    });
-  } else {
-    scores = Array.from(document.querySelectorAll('.p-score')).map(i => parseFloat(i.value));
-  }
 
-  const results = names.map((name, i) => ({
-    name,
-    score: scores[i],
-    currentRating: players[name] || 1000
-  }));
+    if (new Set(names).size !== names.length) {
+      alert("Duplicate player names detected.");
+      return;
+    }
 
-  processMatch(results, date, gameName, winCondition);
+    let scores = [];
+    if (winCondition === 'noscore') {
+      const winnerRadio = document.querySelector('.p-winner:checked');
+      if (!winnerRadio) {
+        alert("Please select a winner.");
+        return;
+      }
 
-            // ... inside your matchForm submit listener ...
-processMatch(results, date, gameName, winCondition);
-updatePlayerDatalist(); // Add this line here to capture new players immediately
-  // UI Reset
-  document.getElementById('gameName').value = '';
-  document.getElementById('playerRows').innerHTML = '';
-  document.getElementById('matchDate').valueAsDate = new Date();
+      // Assign score 1 to the winner, and 0 to losers
+      const rows = document.querySelectorAll('.player-row');
+      rows.forEach(row => {
+        const isWinner = row.querySelector('.p-winner').checked;
+        scores.push(isWinner ? 1 : 0);
+      });
+    } else {
+      scores = Array.from(document.querySelectorAll('.p-score')).map(i => parseFloat(i.value));
+    }
+
+    const results = names.map((name, i) => ({
+      name,
+      score: scores[i],
+      currentRating: players[name] || 1000
+    }));
+
+    // Process the match exactly once
+    processMatch(results, date, gameName, winCondition);
+    updatePlayerDatalist();
+
+    // UI Reset
+    document.getElementById('gameName').value = '';
+    document.getElementById('playerRows').innerHTML = '';
+    document.getElementById('matchDate').valueAsDate = new Date();
+    addPlayerRow();
+    addPlayerRow();
+  });
+
+  // Initial page load setup (Runs exactly once)
   addPlayerRow();
   addPlayerRow();
-});
-
-        addPlayerRow(); addPlayerRow();
-        renderAll();
-        // ... bottom of your script
-addPlayerRow();
-addPlayerRow();
-renderAll();
-updatePlayerDatalist(); // Add this line here
-    </script>
+  renderAll();
+  updatePlayerDatalist();
+</script>
 </body>
 </html>
