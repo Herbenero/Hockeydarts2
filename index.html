@@ -97,7 +97,8 @@
             </section>
         </div>
     </div>
-
+<!-- Datalist for player name autocomplete -->
+<datalist id="playerNamesList"></datalist>
     <script>
         const K = 30;
         let players = JSON.parse(localStorage.getItem('hr_v3_players')) || {};
@@ -113,7 +114,8 @@
   
   row.innerHTML = `
     <div class="col-span-6">
-      <input type="text" placeholder="Player Name" required class="p-name w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
+      <!-- Added list="playerNamesList" here -->
+      <input type="text" placeholder="Player Name" list="playerNamesList" required class="p-name w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
     </div>
     <div class="col-span-5 score-container">
       <input type="number" placeholder="Score" required class="p-score w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500 text-center">
@@ -129,9 +131,21 @@
     </div>
   `;
   container.appendChild(row);
-  toggleScoreInputs(); // Ensure UI state matches current dropdown selection
+  toggleScoreInputs(); 
 }
 
+        function updatePlayerDatalist() {
+  const datalist = document.getElementById('playerNamesList');
+  if (!datalist) return;
+  
+  // Get all unique player names from the players object
+  const uniqueNames = Object.keys(players).sort();
+  
+  datalist.innerHTML = uniqueNames
+    .map(name => `<option value="${name}"></option>`)
+    .join('');
+}
+        
         function getExpectedScore(ra, rb) {
             return 1 / (1 + Math.pow(10, (rb - ra) / 400));
         }
@@ -302,6 +316,9 @@
 
   processMatch(results, date, gameName, winCondition);
 
+            // ... inside your matchForm submit listener ...
+processMatch(results, date, gameName, winCondition);
+updatePlayerDatalist(); // Add this line here to capture new players immediately
   // UI Reset
   document.getElementById('gameName').value = '';
   document.getElementById('playerRows').innerHTML = '';
@@ -312,6 +329,11 @@
 
         addPlayerRow(); addPlayerRow();
         renderAll();
+        // ... bottom of your script
+addPlayerRow();
+addPlayerRow();
+renderAll();
+updatePlayerDatalist(); // Add this line here
     </script>
 </body>
 </html>
