@@ -42,10 +42,12 @@
                             </div>
                             <div>
                                 <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Win Condition</label>
-                                <select id="winCondition" class="w-full bg-slate-800 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
-                                    <option value="high">High Score Wins</option>
-                                    <option value="low">Low Score Wins</option>
-                                </select>
+                                <select id="winCondition" class="w-full bg-slate-800 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500" onchange="toggleScoreInputs()">
+  <option value="high">High Score Wins</option>
+  <option value="low">Low Score Wins</option>
+  <option value="places">Places (1st, 2nd, etc.)</option>
+  <option value="noscore">No Score (Select Winner)</option>
+</select>
                             </div>
                         </div>
 
@@ -104,26 +106,56 @@
         document.getElementById('matchDate').valueAsDate = new Date();
 
         function addPlayerRow() {
-            const container = document.getElementById('playerRows');
-            const row = document.createElement('div');
-            row.className = "grid grid-cols-12 gap-3 items-center player-row animate-in fade-in slide-in-from-left-2 duration-200";
-            row.innerHTML = `
-                <div class="col-span-7">
-                    <input type="text" placeholder="Player Name" required class="p-name w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
-                </div>
-                <div class="col-span-4">
-                    <input type="number" placeholder="Score" required class="p-score w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500 text-center">
-                </div>
-                <div class="col-span-1 text-right">
-                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-slate-500 hover:text-red-500 text-xl">&times;</button>
-                </div>
-            `;
-            container.appendChild(row);
-        }
+  const container = document.getElementById('playerRows');
+  const winCond = document.getElementById('winCondition').value;
+  const row = document.createElement('div');
+  row.className = "grid grid-cols-12 gap-3 items-center player-row animate-in fade-in slide-in-from-left-2 duration-200";
+  
+  row.innerHTML = `
+    <div class="col-span-6">
+      <input type="text" placeholder="Player Name" required class="p-name w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500">
+    </div>
+    <div class="col-span-5 score-container">
+      <input type="number" placeholder="Score" required class="p-score w-full bg-slate-900 border border-slate-700 rounded p-2 focus:outline-none focus:border-red-500 text-center">
+    </div>
+    <div class="col-span-5 winner-container hidden text-center">
+      <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
+        <input type="radio" name="noscore-winner" class="p-winner accent-red-500 w-4 h-4">
+        <span>Winner</span>
+      </label>
+    </div>
+    <div class="col-span-1 text-right">
+      <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-slate-500 hover:text-red-500 text-xl">&times;</button>
+    </div>
+  `;
+  container.appendChild(row);
+  toggleScoreInputs(); // Ensure UI state matches current dropdown selection
+}
 
         function getExpectedScore(ra, rb) {
             return 1 / (1 + Math.pow(10, (rb - ra) / 400));
         }
+        function toggleScoreInputs() {
+  const winCond = document.getElementById('winCondition').value;
+  const scoreContainers = document.querySelectorAll('.score-container');
+  const winnerContainers = document.querySelectorAll('.winner-container');
+  const scoreInputs = document.querySelectorAll('.p-score');
+
+  if (winCond === 'noscore') {
+    scoreContainers.forEach(el => el.classList.add('hidden'));
+    winnerContainers.forEach(el => el.classList.remove('hidden'));
+    scoreInputs.forEach(el => el.removeAttribute('required'));
+  } else {
+    scoreContainers.forEach(el => el.classList.remove('hidden'));
+    winnerContainers.forEach(el => el.classList.add('hidden'));
+    scoreInputs.forEach(el => el.setAttribute('required', ''));
+    
+    // Change placeholder dynamically for "Places"
+    scoreInputs.forEach(el => {
+      el.placeholder = winCond === 'places' ? "Place (e.g. 1)" : "Score";
+    });
+  }
+}
 
         function processMatch(matchResults, date, gameName, winCondition) {
             // Sort for history summary display (still useful to see who "won")
@@ -143,21 +175,17 @@
                     const ea = getExpectedScore(p1.currentRating, p2.currentRating);
                     
                     let outcome;
-                    if (p1.score === p2.score) {
-                        outcome = 0.5;
-                    } else {
-                        if (winCondition === 'high') {
-                            outcome = (p1.score > p2.score) ? 1 : 0;
-                        } else {
-                            outcome = (p1.score < p2.score) ? 1 : 0;
-                        }
-                    }
-
-                    let winChange = (K / (numPlayers - 1)) * (outcome - ea);
-                    ratingChanges[p1.name] += winChange;
-                    ratingChanges[p2.name] -= winChange;
-                }
-            }
+if (p1.score === p2.score) {
+  outcome = 0.5;
+} else {
+  // 'high' and 'noscore' (where winner is 1 and loser is 0) use High Wins
+  if (winCondition === 'high' || winCondition === 'noscore') {
+    outcome = (p1.score > p2.score) ? 1 : 0;
+  } else { 
+    // 'low' and 'places' use Low Wins
+    outcome = (p1.score < p2.score) ? 1 : 0;
+  }
+}
 
             for (const name in ratingChanges) {
                 players[name] = Math.round((players[name] || 1000) + ratingChanges[name]);
@@ -212,28 +240,54 @@
         }
 
         document.getElementById('matchForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const date = document.getElementById('matchDate').value;
-            const gameName = document.getElementById('gameName').value.trim();
-            const winCondition = document.getElementById('winCondition').value;
-            const names = Array.from(document.querySelectorAll('.p-name')).map(i => i.value.trim());
-            const scores = Array.from(document.querySelectorAll('.p-score')).map(i => parseFloat(i.value));
-            
-            if (names.length < 2) { alert("Enter at least 2 players."); return; }
-            if (new Set(names).size !== names.length) { alert("Duplicate player names detected."); return; }
+  e.preventDefault();
+  const date = document.getElementById('matchDate').value;
+  const gameName = document.getElementById('gameName').value.trim();
+  const winCondition = document.getElementById('winCondition').value;
+  const names = Array.from(document.querySelectorAll('.p-name')).map(i => i.value.trim());
+  
+  if (names.length < 2) {
+    alert("Enter at least 2 players.");
+    return;
+  }
+  if (new Set(names).size !== names.length) {
+    alert("Duplicate player names detected.");
+    return;
+  }
 
-            const results = names.map((name, i) => ({
-                name, score: scores[i], currentRating: players[name] || 1000
-            }));
+  let scores = [];
+  if (winCondition === 'noscore') {
+    const winnerRadio = document.querySelector('.p-winner:checked');
+    if (!winnerRadio) {
+      alert("Please select a winner.");
+      return;
+    }
+    
+    // Assign score 1 to the winner, and 0 to losers
+    const rows = document.querySelectorAll('.player-row');
+    rows.forEach(row => {
+      const isWinner = row.querySelector('.p-winner').checked;
+      scores.push(isWinner ? 1 : 0);
+    });
+  } else {
+    scores = Array.from(document.querySelectorAll('.p-score')).map(i => parseFloat(i.value));
+  }
 
-            processMatch(results, date, gameName, winCondition);
-            
-            // UI Reset
-            document.getElementById('gameName').value = '';
-            document.getElementById('playerRows').innerHTML = '';
-            document.getElementById('matchDate').valueAsDate = new Date();
-            addPlayerRow(); addPlayerRow();
-        });
+  const results = names.map((name, i) => ({
+    name,
+    score: scores[i],
+    currentRating: players[name] || 1000
+  }));
+
+  processMatch(results, date, gameName, winCondition);
+
+  // UI Reset
+  document.getElementById('gameName').value = '';
+  document.getElementById('playerRows').innerHTML = '';
+  document.getElementById('matchDate').valueAsDate = new Date();
+  addPlayerRow();
+  addPlayerRow();
+});
 
         addPlayerRow(); addPlayerRow();
         renderAll();
