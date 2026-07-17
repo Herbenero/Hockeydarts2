@@ -158,47 +158,68 @@
 }
 
         function processMatch(matchResults, date, gameName, winCondition) {
-            // Sort for history summary display (still useful to see who "won")
-            const sortedResults = [...matchResults].sort((a, b) => 
-                winCondition === 'high' ? b.score - a.score : a.score - b.score
-            );
+  // Sort for history summary display (still useful to see who "won")
+  const sortedResults = [...matchResults].sort((a, b) => 
+    winCondition === 'high' ? b.score - a.score : a.score - b.score
+  );
 
-            const numPlayers = matchResults.length;
-            const ratingChanges = {};
-            matchResults.forEach(p => ratingChanges[p.name] = 0);
+  const numPlayers = matchResults.length;
+  const ratingChanges = {};
+  
+  // Initialize rating change accumulator for this match
+  matchResults.forEach(p => ratingChanges[p.name] = 0);
 
-            for (let i = 0; i < numPlayers; i++) {
-                for (let j = i + 1; j < numPlayers; j++) {
-                    const p1 = matchResults[i];
-                    const p2 = matchResults[j];
-                    
-                    const ea = getExpectedScore(p1.currentRating, p2.currentRating);
-                    
-                    let outcome;
-if (p1.score === p2.score) {
-  outcome = 0.5;
-} else {
-  // 'high' and 'noscore' (where winner is 1 and loser is 0) use High Wins
-  if (winCondition === 'high' || winCondition === 'noscore') {
-    outcome = (p1.score > p2.score) ? 1 : 0;
-  } else { 
-    // 'low' and 'places' use Low Wins
-    outcome = (p1.score < p2.score) ? 1 : 0;
-  }
-}
-
-            for (const name in ratingChanges) {
-                players[name] = Math.round((players[name] || 1000) + ratingChanges[name]);
-            }
-
-            const summary = sortedResults.map(p => `${p.name} (${p.score})`).join(", ");
-            history.unshift({ date, game: gameName, summary });
-
-            localStorage.setItem('hr_v3_players', JSON.stringify(players));
-            localStorage.setItem('hr_v3_history', JSON.stringify(history));
-            renderAll();
+  // Calculate pairwise Elo updates
+  for (let i = 0; i < numPlayers; i++) {
+    for (let j = i + 1; j < numPlayers; j++) {
+      const p1 = matchResults[i];
+      const p2 = matchResults[j];
+      
+      const ea = getExpectedScore(p1.currentRating, p2.currentRating);
+      
+      let outcome;
+      if (p1.score === p2.score) {
+        outcome = 0.5;
+      } else {
+        // 'high' and 'noscore' (where winner is 1 and loser is 0) use High Wins
+        if (winCondition === 'high' || winCondition === 'noscore') {
+          outcome = (p1.score > p2.score) ? 1 : 0;
+        } else { 
+          // 'low' and 'places' use Low Wins
+          outcome = (p1.score < p2.score) ? 1 : 0;
         }
+      }
 
+      // Calculate rating change based on outcome vs expected outcome
+      const winChange = K * (outcome - ea);
+      
+      ratingChanges[p1.name] += winChange;
+      ratingChanges[p2.name] -= winChange;
+    }
+  }
+
+  // Apply all rating changes at once after all pairs are calculated
+  matchResults.forEach(p => {
+    const finalChange = ratingChanges[p.name];
+    players[p.name] = Math.round((players[p.name] || 1000) + finalChange);
+  });
+
+  // Build clean history summary string
+  let summary;
+  if (winCondition === 'noscore') {
+    // Show winner first without displaying dummy scores (1 and 0)
+    summary = sortedResults.map((p, idx) => idx === 0 ? `🏆 ${p.name}` : p.name).join(", ");
+  } else {
+    summary = sortedResults.map(p => `${p.name} (${p.score})`).join(", ");
+  }
+
+  history.unshift({ date, game: gameName, summary });
+  
+  localStorage.setItem('hr_v3_players', JSON.stringify(players));
+  localStorage.setItem('hr_v3_history', JSON.stringify(history));
+  
+  renderAll();
+}
         function renderAll() {
             renderLeaderboard();
             renderHistory();
