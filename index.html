@@ -1,1758 +1,519 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hockey Darts</title>
-  <meta name="description" content="Hockey Darts — a fast, competitive dart webapp with league energy, stat-focused layout, and bold rink-inspired design." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#eef3f7;
-      --surface:#f8fbfd;
-      --surface-2:rgba(255,255,255,.62);
-      --ink:#0c1622;
-      --muted:#506173;
-      --line:#c4d1dd;
-      --ice:#dff5ff;
-      --ice-deep:#a7dff4;
-      --navy:#10233f;
-      --navy-2:#163763;
-      --red:#d7263d;
-      --red-deep:#a7142a;
-      --silver:#8ea2b8;
-      --goal:#ffd166;
-      --shadow:0 20px 60px rgba(8,20,35,.12);
-      --shadow-soft:0 12px 30px rgba(8,20,35,.08);
-      --radius:24px;
-      --radius-sm:16px;
-      --max:1280px;
-    }
-
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:"Inter", sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(circle at 20% 10%, rgba(167,223,244,.5), transparent 28%),
-        radial-gradient(circle at 85% 18%, rgba(255,209,102,.18), transparent 20%),
-        linear-gradient(180deg, #f8fcff 0%, #eef4f8 55%, #e7eef4 100%);
-      min-height:100vh;
-      overflow-x:hidden;
-    }
-
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background:
-        repeating-linear-gradient(
-          90deg,
-          transparent 0 120px,
-          rgba(16,35,63,.02) 120px 121px
-        ),
-        repeating-linear-gradient(
-          0deg,
-          transparent 0 120px,
-          rgba(16,35,63,.02) 120px 121px
-        );
-      mask-image:linear-gradient(to bottom, rgba(0,0,0,.55), transparent 70%);
-      z-index:-1;
-    }
-
-    a{color:inherit;text-decoration:none}
-    button{font:inherit}
-    img,svg{display:block;max-width:100%}
-
-    .container{
-      width:min(calc(100% - 2rem), var(--max));
-      margin-inline:auto;
-    }
-
-    .reveal{
-      opacity:0;
-      transform:translateY(26px);
-      transition:opacity .8s ease, transform .8s ease;
-    }
-
-    .reveal.visible{
-      opacity:1;
-      transform:translateY(0);
-    }
-
-    .stagger > *{
-      opacity:0;
-      transform:translateY(24px);
-      animation:rise .9s cubic-bezier(.2,.8,.2,1) forwards;
-    }
-
-    .stagger > *:nth-child(1){animation-delay:.08s}
-    .stagger > *:nth-child(2){animation-delay:.18s}
-    .stagger > *:nth-child(3){animation-delay:.28s}
-    .stagger > *:nth-child(4){animation-delay:.38s}
-    .stagger > *:nth-child(5){animation-delay:.48s}
-    .stagger > *:nth-child(6){animation-delay:.58s}
-
-    @keyframes rise{
-      to{opacity:1; transform:translateY(0)}
-    }
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      backdrop-filter:blur(16px);
-      background:linear-gradient(180deg, rgba(248,251,253,.9), rgba(248,251,253,.72));
-      border-bottom:1px solid rgba(16,35,63,.08);
-    }
-
-    .nav{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:1rem;
-      min-height:78px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:.9rem;
-      font-weight:800;
-      letter-spacing:.04em;
-    }
-
-    .brand-mark{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      position:relative;
-      overflow:hidden;
-      background:
-        linear-gradient(135deg, var(--navy) 0 48%, var(--red) 48% 52%, var(--ice) 52% 100%);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.35),
-        0 10px 24px rgba(16,35,63,.18);
-    }
-
-    .brand-mark::before,
-    .brand-mark::after{
-      content:"";
-      position:absolute;
-      background:#fff;
-      opacity:.9;
-    }
-
-    .brand-mark::before{
-      width:3px;height:28px;left:20px;top:8px;border-radius:99px;
-    }
-
-    .brand-mark::after{
-      width:26px;height:3px;left:9px;top:20px;border-radius:99px;
-    }
-
-    .brand-text{
-      font-family:"Oswald", sans-serif;
-      text-transform:uppercase;
-      line-height:.95;
-      font-size:1.15rem;
-    }
-
-    .brand-text span{
-      display:block;
-      color:var(--muted);
-      font-size:.73rem;
-      letter-spacing:.18em;
-      margin-top:.16rem;
-    }
-
-    .nav-links{
-      display:flex;
-      align-items:center;
-      gap:1.25rem;
-      color:var(--muted);
-      font-weight:600;
-      font-size:.95rem;
-    }
-
-    .nav-links a{
-      position:relative;
-      padding:.25rem 0;
-    }
-
-    .nav-links a::after{
-      content:"";
-      position:absolute;
-      left:0;
-      bottom:-.15rem;
-      width:100%;
-      height:2px;
-      background:linear-gradient(90deg, var(--red), var(--navy));
-      transform:scaleX(0);
-      transform-origin:left;
-      transition:transform .28s ease;
-    }
-
-    .nav-links a:hover::after{
-      transform:scaleX(1);
-    }
-
-    .nav-actions{
-      display:flex;
-      align-items:center;
-      gap:.75rem;
-    }
-
-    .btn{
-      border:none;
-      border-radius:999px;
-      padding:.9rem 1.2rem;
-      font-weight:700;
-      cursor:pointer;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:.55rem;
-      min-height:48px;
-    }
-
-    .btn:hover{
-      transform:translateY(-2px) scale(1.01);
-    }
-
-    .btn:active{
-      transform:translateY(0) scale(.985);
-    }
-
-    .btn-primary{
-      color:#fff;
-      background:linear-gradient(135deg, var(--navy), var(--navy-2));
-      box-shadow:0 12px 28px rgba(16,35,63,.22);
-    }
-
-    .btn-primary:hover{
-      box-shadow:0 16px 34px rgba(16,35,63,.28);
-    }
-
-    .btn-accent{
-      color:#fff;
-      background:linear-gradient(135deg, var(--red), var(--red-deep));
-      box-shadow:0 12px 28px rgba(215,38,61,.24);
-    }
-
-    .btn-ghost{
-      background:rgba(255,255,255,.55);
-      color:var(--navy);
-      border:1px solid rgba(16,35,63,.1);
-      backdrop-filter:blur(12px);
-    }
-
-    .menu-toggle{
-      display:none;
-      width:48px;height:48px;border-radius:14px;
-      border:1px solid rgba(16,35,63,.1);
-      background:rgba(255,255,255,.68);
-      backdrop-filter:blur(10px);
-      cursor:pointer;
-      padding:0;
-    }
-
-    .menu-toggle span{
-      display:block;width:22px;height:2px;background:var(--navy);margin:5px auto;border-radius:99px;
-      transition:.25s ease;
-    }
-
-    .hero{
-      padding:clamp(2rem, 3vw, 3rem) 0 2rem;
-    }
-
-    .hero-shell{
-      position:relative;
-      overflow:hidden;
-      border-radius:32px;
-      background:
-        linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,255,255,.58)),
-        linear-gradient(120deg, rgba(223,245,255,.7), rgba(255,255,255,.2));
-      border:1px solid rgba(16,35,63,.08);
-      backdrop-filter:blur(16px);
-      box-shadow:var(--shadow);
-    }
-
-    .hero-shell::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        linear-gradient(90deg, transparent 0 14%, rgba(215,38,61,.10) 14% 15%, transparent 15% 49%, rgba(215,38,61,.10) 49% 50.5%, transparent 50.5% 84%, rgba(215,38,61,.10) 84% 85%, transparent 85%),
-        linear-gradient(180deg, transparent 0 18%, rgba(16,35,63,.06) 18% 18.6%, transparent 18.6% 81%, rgba(16,35,63,.06) 81% 81.6%, transparent 81.6%);
-      opacity:.65;
-      pointer-events:none;
-    }
-
-    .hero-grid{
-      position:relative;
-      display:grid;
-      grid-template-columns:1.15fr .85fr;
-      gap:1.5rem;
-      padding:clamp(1.25rem, 2vw, 1.5rem);
-      min-height:78vh;
-    }
-
-    .hero-copy{
-      padding:clamp(1.5rem, 4vw, 4rem);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      z-index:1;
-    }
-
-    .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:.65rem;
-      width:max-content;
-      padding:.5rem .85rem;
-      border-radius:999px;
-      background:rgba(255,255,255,.72);
-      border:1px solid rgba(16,35,63,.08);
-      color:var(--navy);
-      font-size:.84rem;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.14em;
-      backdrop-filter:blur(10px);
-      box-shadow:var(--shadow-soft);
-    }
-
-    .eyebrow::before{
-      content:"";
-      width:.55rem;height:.55rem;border-radius:50%;
-      background:var(--red);
-      box-shadow:0 0 0 6px rgba(215,38,61,.12);
-    }
-
-    h1,h2,h3{
-      font-family:"Oswald", sans-serif;
-      margin:0;
-      line-height:.95;
-      text-transform:uppercase;
-      letter-spacing:.02em;
-    }
-
-    .hero h1{
-      font-size:clamp(3.2rem, 9vw, 7.4rem);
-      margin-top:1rem;
-      max-width:10ch;
-    }
-
-    .hero h1 .accent{
-      color:var(--red);
-    }
-
-    .hero-lead{
-      margin:1.2rem 0 0;
-      max-width:56ch;
-      font-size:clamp(1rem, 1.5vw, 1.1rem);
-      color:var(--muted);
-      line-height:1.7;
-    }
-
-    .hero-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:.9rem;
-      margin-top:1.7rem;
-    }
-
-    .hero-metrics{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:.9rem;
-      margin-top:2rem;
-    }
-
-    .metric{
-      padding:1rem 1rem 1.05rem;
-      background:rgba(255,255,255,.64);
-      border:1px solid rgba(16,35,63,.08);
-      border-radius:20px;
-      backdrop-filter:blur(10px);
-    }
-
-    .metric strong{
-      display:block;
-      font-family:"Oswald", sans-serif;
-      font-size:clamp(1.6rem, 3vw, 2.25rem);
-      line-height:1;
-      color:var(--navy);
-    }
-
-    .metric span{
-      display:block;
-      margin-top:.4rem;
-      color:var(--muted);
-      font-size:.88rem;
-      font-weight:600;
-      letter-spacing:.02em;
-    }
-
-    .hero-panel{
-      position:relative;
-      min-height:540px;
-      border-radius:28px;
-      overflow:hidden;
-      background:
-        linear-gradient(180deg, rgba(16,35,63,.96), rgba(9,21,38,.98));
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 24px 50px rgba(7,18,34,.24);
-    }
-
-    .rink{
-      position:absolute;
-      inset:1rem;
-      border-radius:26px;
-      background:
-        linear-gradient(180deg, rgba(221,244,255,.97), rgba(201,233,247,.97));
-      overflow:hidden;
-    }
-
-    .rink::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(circle at center, transparent 0 11%, rgba(215,38,61,.95) 11% 11.8%, transparent 12.2%),
-        linear-gradient(90deg, transparent 0 17%, rgba(215,38,61,.9) 17% 18.2%, transparent 18.2% 49%, rgba(215,38,61,.9) 49% 50.5%, transparent 50.5% 81.8%, rgba(215,38,61,.9) 81.8% 83%, transparent 83%),
-        linear-gradient(180deg, transparent 0 8%, rgba(16,35,63,.18) 8.1% 8.35%, transparent 8.35% 91.65%, rgba(16,35,63,.18) 91.65% 91.9%, transparent 91.9%);
-      opacity:.95;
-    }
-
-    .goal{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      width:88px;
-      height:36px;
-      border:3px solid var(--red);
-      border-bottom:none;
-      border-radius:14px 14px 0 0;
-      background:rgba(255,255,255,.45);
-    }
-
-    .goal.top{top:20px}
-    .goal.bottom{bottom:20px; transform:translateX(-50%) rotate(180deg)}
-
-    .faceoff{
-      position:absolute;
-      width:108px;height:108px;border-radius:50%;
-      border:3px solid rgba(16,35,63,.25);
-    }
-
-    .faceoff.f1{left:9%; top:16%}
-    .faceoff.f2{right:9%; top:16%}
-    .faceoff.f3{left:9%; bottom:16%}
-    .faceoff.f4{right:9%; bottom:16%}
-
-    .scoreboard{
-      position:absolute;
-      top:1.25rem;
-      left:1.25rem;
-      right:1.25rem;
-      display:grid;
-      grid-template-columns:1fr auto 1fr;
-      gap:.75rem;
-      align-items:center;
-      z-index:2;
-    }
-
-    .score-team,
-    .score-center{
-      padding:.85rem 1rem;
-      background:rgba(7,17,31,.56);
-      color:#f3f8fc;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:18px;
-      backdrop-filter:blur(10px);
-    }
-
-    .score-team small,
-    .score-center small{
-      display:block;
-      opacity:.68;
-      text-transform:uppercase;
-      font-size:.72rem;
-      letter-spacing:.16em;
-      margin-bottom:.35rem;
-      font-weight:700;
-    }
-
-    .score-value{
-      font-family:"Oswald", sans-serif;
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:.75rem;
-      font-size:2rem;
-      line-height:1;
-      text-transform:uppercase;
-    }
-
-    .score-team.away .score-value b{color:var(--ice)}
-    .score-team.home .score-value b{color:#ffd8de}
-
-    .score-center{
-      text-align:center;
-      min-width:126px;
-    }
-
-    .score-center strong{
-      font-family:"Oswald", sans-serif;
-      font-size:1.85rem;
-      line-height:1;
-      color:var(--goal);
-      display:block;
-    }
-
-    .dart{
-      position:absolute;
-      width:106px;
-      filter:drop-shadow(0 10px 18px rgba(16,35,63,.18));
-      transition:transform .5s ease;
-      z-index:3;
-    }
-
-    .dart svg{width:100%;height:auto}
-    .dart.d1{top:32%; left:27%; transform:rotate(-18deg)}
-    .dart.d2{top:50%; right:18%; transform:rotate(24deg)}
-    .dart.d3{bottom:18%; left:42%; transform:rotate(6deg)}
-
-    .hero-panel:hover .dart.d1{transform:rotate(-11deg) translateY(-4px)}
-    .hero-panel:hover .dart.d2{transform:rotate(17deg) translateY(4px)}
-    .hero-panel:hover .dart.d3{transform:rotate(11deg) translateY(-2px)}
-
-    .puck{
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      width:44px;height:44px;border-radius:50%;
-      background:radial-gradient(circle at 35% 35%, #34495e, #10151d 72%);
-      box-shadow:0 10px 18px rgba(10,16,28,.28);
-      z-index:2;
-    }
-
-    .ticker{
-      padding:1rem 0 0;
-    }
-
-    .ticker-track{
-      display:flex;
-      gap:1rem;
-      overflow:hidden;
-      mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-    }
-
-    .ticker-inner{
-      display:flex;
-      align-items:center;
-      gap:1rem;
-      min-width:max-content;
-      animation:scrollX 28s linear infinite;
-    }
-
-    .ticker-pill{
-      background:rgba(255,255,255,.68);
-      border:1px solid rgba(16,35,63,.08);
-      border-radius:999px;
-      padding:.8rem 1rem;
-      color:var(--navy);
-      display:flex;
-      align-items:center;
-      gap:.75rem;
-      backdrop-filter:blur(10px);
-      white-space:nowrap;
-      font-size:.95rem;
-      font-weight:700;
-      box-shadow:var(--shadow-soft);
-    }
-
-    .ticker-pill b{
-      font-family:"Oswald", sans-serif;
-      color:var(--red);
-      letter-spacing:.04em;
-    }
-
-    @keyframes scrollX{
-      to{transform:translateX(-50%)}
-    }
-
-    section{
-      padding:5rem 0;
-    }
-
-    .section-head{
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:1.5rem;
-      align-items:end;
-      margin-bottom:2rem;
-    }
-
-    .section-head h2{
-      font-size:clamp(2.3rem, 5vw, 4.5rem);
-    }
-
-    .section-head p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.75;
-      max-width:52ch;
-    }
-
-    .arena-layout{
-      display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:1.25rem;
-    }
-
-    .slab{
-      position:relative;
-      overflow:hidden;
-      border-radius:28px;
-      border:1px solid rgba(16,35,63,.08);
-      background:linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.6));
-      backdrop-filter:blur(14px);
-      box-shadow:var(--shadow-soft);
-    }
-
-    .slab.pad-lg{padding:1.5rem}
-    .slab.pad-xl{padding:clamp(1.4rem, 2.6vw, 2rem)}
-
-    .score-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:1rem;
-      min-height:100%;
-    }
-
-    .feature-block{
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:1rem;
-      min-height:250px;
-      padding:1.35rem;
-      border-radius:22px;
-      background:
-        linear-gradient(145deg, rgba(248,251,253,.8), rgba(231,240,247,.8));
-      border:1px solid rgba(16,35,63,.06);
-    }
-
-    .feature-block .index{
-      font-family:"Oswald", sans-serif;
-      font-size:.95rem;
-      color:var(--red);
-      letter-spacing:.16em;
-    }
-
-    .feature-block h3{
-      font-size:2rem;
-      max-width:9ch;
-    }
-
-    .feature-block p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.7;
-      max-width:36ch;
-    }
-
-    .stat-ribbon{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:1rem;
-      margin-top:1rem;
-      padding-top:1rem;
-      border-top:1px dashed rgba(16,35,63,.14);
-      color:var(--navy);
-      font-weight:700;
-    }
-
-    .feature-side{
-      display:grid;
-      gap:1rem;
-    }
-
-    .mini-score{
-      padding:1.25rem;
-      border-radius:22px;
-      background:linear-gradient(180deg, rgba(16,35,63,.96), rgba(11,24,43,.98));
-      color:#eef7fd;
-      min-height:220px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
-
-    .mini-score .label{
-      text-transform:uppercase;
-      letter-spacing:.18em;
-      font-size:.76rem;
-      opacity:.72;
-      font-weight:700;
-    }
-
-    .mini-score .big{
-      font-family:"Oswald", sans-serif;
-      font-size:clamp(3.2rem, 8vw, 5rem);
-      line-height:.88;
-    }
-
-    .mini-score p{
-      margin:0;
-      color:rgba(238,247,253,.74);
-      line-height:1.65;
-      max-width:28ch;
-    }
-
-    .ice-diagram{
-      min-height:220px;
-      position:relative;
-      border-radius:22px;
-      overflow:hidden;
-      background:linear-gradient(180deg, #e2f6ff, #caeaf6);
-      border:1px solid rgba(16,35,63,.06);
-    }
-
-    .ice-diagram::before{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(circle at center, transparent 0 13%, rgba(215,38,61,.86) 13% 14%, transparent 14.5%),
-        linear-gradient(90deg, transparent 0 17%, rgba(215,38,61,.8) 17% 18%, transparent 18% 49%, rgba(215,38,61,.85) 49% 50%, transparent 50% 82%, rgba(215,38,61,.8) 82% 83%, transparent 83%);
-    }
-
-    .ice-diagram .chip{
-      position:absolute;
-      padding:.55rem .8rem;
-      border-radius:999px;
-      background:rgba(255,255,255,.8);
-      border:1px solid rgba(16,35,63,.08);
-      color:var(--navy);
-      font-size:.82rem;
-      font-weight:800;
-      backdrop-filter:blur(8px);
-      box-shadow:var(--shadow-soft);
-    }
-
-    .chip.c1{top:18%;left:8%}
-    .chip.c2{top:62%;right:8%}
-    .chip.c3{bottom:14%;left:36%}
-
-    .experience{
-      position:relative;
-    }
-
-    .experience-wrap{
-      display:grid;
-      grid-template-columns:.95fr 1.05fr;
-      gap:1.25rem;
-    }
-
-    .timeline{
-      display:grid;
-      gap:1rem;
-    }
-
-    .timeline-item{
-      display:grid;
-      grid-template-columns:auto 1fr;
-      gap:1rem;
-      align-items:start;
-      padding:1.15rem 0;
-      border-bottom:1px solid rgba(16,35,63,.08);
-    }
-
-    .timeline-item:last-child{border-bottom:none}
-
-    .timeline-badge{
-      width:54px;height:54px;border-radius:18px;
-      display:grid;place-items:center;
-      background:linear-gradient(145deg, var(--navy), var(--navy-2));
-      color:#fff;
-      box-shadow:0 12px 24px rgba(16,35,63,.18);
-      font-family:"Oswald", sans-serif;
-      font-size:1.15rem;
-    }
-
-    .timeline-item h3{
-      font-size:1.7rem;
-      margin-bottom:.45rem;
-    }
-
-    .timeline-item p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.7;
-    }
-
-    .control-surface{
-      display:grid;
-      gap:1rem;
-      align-content:start;
-    }
-
-    .control-top{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      gap:1rem;
-    }
-
-    .toggle-group{
-      display:flex;
-      gap:.6rem;
-      flex-wrap:wrap;
-    }
-
-    .chip-btn{
-      border:none;
-      cursor:pointer;
-      border-radius:999px;
-      padding:.78rem 1rem;
-      background:rgba(255,255,255,.72);
-      color:var(--navy);
-      border:1px solid rgba(16,35,63,.08);
-      font-weight:800;
-      transition:.18s ease;
-      backdrop-filter:blur(10px);
-    }
-
-    .chip-btn.active,
-    .chip-btn:hover{
-      background:linear-gradient(135deg, var(--red), var(--red-deep));
-      color:#fff;
-      box-shadow:0 12px 24px rgba(215,38,61,.2);
-      transform:translateY(-1px);
-    }
-
-    .score-stage{
-      padding:1rem;
-      border-radius:26px;
-      background:linear-gradient(180deg, rgba(9,22,39,.98), rgba(16,35,63,.98));
-      color:#eef7fd;
-      min-height:360px;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      gap:1rem;
-      overflow:hidden;
-      position:relative;
-    }
-
-    .score-stage::before{
-      content:"";
-      position:absolute;
-      inset:auto -10% -30% auto;
-      width:320px;height:320px;border-radius:50%;
-      background:radial-gradient(circle, rgba(255,209,102,.18), transparent 68%);
-      pointer-events:none;
-    }
-
-    .stage-head{
-      display:flex;
-      justify-content:space-between;
-      gap:1rem;
-      align-items:center;
-    }
-
-    .stage-title{
-      font-family:"Oswald", sans-serif;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      font-size:1.25rem;
-    }
-
-    .stage-score{
-      display:grid;
-      grid-template-columns:1fr auto 1fr;
-      gap:.7rem;
-      align-items:center;
-    }
-
-    .stage-team{
-      padding:1rem;
-      border-radius:20px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .stage-team small{
-      display:block;
-      text-transform:uppercase;
-      letter-spacing:.18em;
-      opacity:.6;
-      font-size:.72rem;
-      margin-bottom:.45rem;
-      font-weight:700;
-    }
-
-    .stage-team strong{
-      font-family:"Oswald", sans-serif;
-      font-size:2.6rem;
-      line-height:.9;
-    }
-
-    .stage-vs{
-      font-family:"Oswald", sans-serif;
-      color:var(--goal);
-      letter-spacing:.08em;
-      font-size:1.4rem;
-    }
-
-    .throws{
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:.8rem;
-    }
-
-    .throw-lane{
-      border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      padding:1rem;
-      min-height:130px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
-
-    .throw-lane span{
-      text-transform:uppercase;
-      letter-spacing:.16em;
-      font-size:.72rem;
-      opacity:.65;
-      font-weight:700;
-    }
-
-    .throw-lane b{
-      font-family:"Oswald", sans-serif;
-      font-size:2.3rem;
-      line-height:1;
-    }
-
-    .throw-lane em{
-      font-style:normal;
-      opacity:.7;
-      color:#c9d7e5;
-      font-size:.9rem;
-    }
-
-    .cta{
-      padding-bottom:6rem;
-    }
-
-    .cta-panel{
-      position:relative;
-      overflow:hidden;
-      display:grid;
-      grid-template-columns:1.05fr .95fr;
-      gap:1rem;
-      border-radius:32px;
-      border:1px solid rgba(16,35,63,.08);
-      background:
-        linear-gradient(135deg, rgba(16,35,63,.98), rgba(22,55,99,.98));
-      color:#f3f8fc;
-      box-shadow:var(--shadow);
-    }
-
-    .cta-panel::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,.06), transparent 22%),
-        linear-gradient(90deg, transparent 0 18%, rgba(255,255,255,.06) 18% 18.4%, transparent 18.4% 49.8%, rgba(215,38,61,.22) 49.8% 50.2%, transparent 50.2% 81.6%, rgba(255,255,255,.06) 81.6% 82%, transparent 82%);
-      opacity:.85;
-      pointer-events:none;
-    }
-
-    .cta-copy,
-    .cta-form{
-      position:relative;
-      z-index:1;
-      padding:clamp(1.5rem, 3vw, 2.4rem);
-    }
-
-    .cta-copy h2{
-      font-size:clamp(2.4rem, 5vw, 4.6rem);
-      max-width:10ch;
-    }
-
-    .cta-copy p{
-      margin:1rem 0 0;
-      color:rgba(243,248,252,.76);
-      line-height:1.75;
-      max-width:48ch;
-    }
-
-    .cta-stripes{
-      display:flex;
-      gap:.8rem;
-      margin-top:1.5rem;
-      flex-wrap:wrap;
-    }
-
-    .cta-stripes span{
-      display:inline-flex;
-      align-items:center;
-      gap:.55rem;
-      padding:.75rem .95rem;
-      border-radius:999px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.08);
-      font-weight:700;
-      color:#e8f1f7;
-    }
-
-    .form-shell{
-      border-radius:26px;
-      padding:1rem;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.1);
-      backdrop-filter:blur(12px);
-    }
-
-    .field{
-      display:grid;
-      gap:.45rem;
-      margin-bottom:.9rem;
-    }
-
-    .field label{
-      font-size:.85rem;
-      text-transform:uppercase;
-      letter-spacing:.14em;
-      color:rgba(243,248,252,.7);
-      font-weight:700;
-    }
-
-    .field input,
-    .field select{
-      width:100%;
-      border:none;
-      outline:none;
-      border-radius:16px;
-      min-height:52px;
-      padding:0 1rem;
-      background:rgba(255,255,255,.92);
-      color:var(--ink);
-      font:inherit;
-      box-shadow:inset 0 0 0 1px rgba(16,35,63,.06);
-    }
-
-    .form-note{
-      color:rgba(243,248,252,.66);
-      font-size:.9rem;
-      line-height:1.6;
-      margin:.25rem 0 1rem;
-    }
-
-    footer{
-      padding:1.5rem 0 2.5rem;
-      color:var(--muted);
-    }
-
-    .footer-row{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      gap:1rem;
-      align-items:center;
-      padding-top:1rem;
-      border-top:1px solid rgba(16,35,63,.08);
-    }
-
-    .footer-row strong{
-      color:var(--navy);
-      font-family:"Oswald", sans-serif;
-      letter-spacing:.05em;
-      text-transform:uppercase;
-    }
-
-    @media (max-width: 1080px){
-      .hero-grid,
-      .arena-layout,
-      .experience-wrap,
-      .cta-panel,
-      .section-head{
-        grid-template-columns:1fr;
-      }
-
-      .hero-panel{min-height:480px}
-      .cta-copy h2{max-width:none}
-    }
-
-    @media (max-width: 820px){
-      .nav-links,
-      .nav-actions .btn-ghost{
-        display:none;
-      }
-
-      .menu-toggle{display:block}
-
-      .nav.open .nav-links{
-        display:flex;
-        position:absolute;
-        left:1rem;
-        right:1rem;
-        top:calc(100% + .5rem);
-        flex-direction:column;
-        align-items:flex-start;
-        padding:1rem;
-        background:rgba(248,251,253,.94);
-        border:1px solid rgba(16,35,63,.08);
-        border-radius:20px;
-        backdrop-filter:blur(16px);
-        box-shadow:var(--shadow-soft);
-      }
-
-      .nav.open .nav-actions{
-        position:absolute;
-        top:calc(100% + 14.5rem);
-        left:1rem;
-        right:1rem;
-        display:flex;
-      }
-
-      .nav.open .nav-actions .btn-ghost{
-        display:inline-flex;
-        flex:1;
-      }
-
-      .hero-metrics,
-      .score-grid,
-      .stage-score,
-      .throws{
-        grid-template-columns:1fr;
-      }
-
-      .scoreboard{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media (max-width: 560px){
-      .container{width:min(calc(100% - 1rem), var(--max))}
-      .hero-grid{padding:.75rem}
-      .hero-copy{padding:1.1rem}
-      .slab.pad-lg,.slab.pad-xl,.cta-copy,.cta-form{padding:1rem}
-      .metric{padding:.9rem}
-      .feature-block h3{font-size:1.6rem}
-      .timeline-item h3{font-size:1.45rem}
-      .hero h1{max-width:12ch}
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hockey Darts - Rink Mentality Scoring</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f1d;
+            --bg-secondary: #121a30;
+            --bg-card: #1a2544;
+            --accent-home: #3b82f6;
+            --accent-away: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #2a3963;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--bg-card);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .screen {
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Setup Screen */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-home);
+        }
+
+        .btn {
+            background: var(--accent-home);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-away {
+            background: var(--accent-away);
+        }
+
+        /* Scoreboard Screen */
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 12px;
+            align-items: center;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .team-box.home { color: var(--accent-home); }
+        .team-box.away { color: var(--accent-away); }
+
+        .team-box h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .team-score {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .match-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .period-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .period-number {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        /* Turn Indicator */
+        .turn-banner {
+            background: var(--bg-card);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            border-left: 4px solid var(--accent-home);
+        }
+
+        .turn-banner.away-turn {
+            border-left-color: var(--accent-away);
+        }
+
+        /* Throw Logger */
+        .throw-log-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .throws-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .throw-slot {
+            background: var(--bg-primary);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .throw-slot.filled {
+            border-style: solid;
+            border-color: var(--border-color);
+            color: var(--text-main);
+            background: var(--bg-card);
+        }
+
+        /* Keypad */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .key-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 14px 0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .key-btn:hover {
+            background: var(--border-color);
+        }
+
+        .key-btn.special {
+            background: #253359;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Game Over Modal / Screen */
+        .winner-banner {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .winner-banner h2 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
-  <header class="topbar">
+
     <div class="container">
-      <nav class="nav" id="nav">
-        <a href="#" class="brand" aria-label="Hockey Darts home">
-          <div class="brand-mark" aria-hidden="true"></div>
-          <div class="brand-text">Hockey Darts <span>Dart Webapp</span></div>
-        </a>
+        <header>
+            <h1>HOCKEY DARTS</h1>
+            <p>Fast Throws · Clean Scores · Rink Mentality</p>
+        </header>
 
-        <div class="nav-links">
-          <a href="#features">Gameplay</a>
-          <a href="#experience">Live Match</a>
-          <a href="#join">Join League</a>
+        <!-- SETUP SCREEN -->
+        <div id="setup-screen" class="screen active">
+            <div class="form-group">
+                <label for="home-name">Home Team</label>
+                <input type="text" id="home-name" value="Frost" placeholder="Enter Home Team">
+            </div>
+            <div class="form-group">
+                <label for="away-name">Away Team</label>
+                <input type="text" id="away-name" value="Blades" placeholder="Enter Away Team">
+            </div>
+            <button class="btn" onclick="startGame()">Start Match (Period 1)</button>
         </div>
 
-        <div class="nav-actions">
-          <button class="btn btn-ghost" type="button">League Rules</button>
-          <button class="btn btn-primary" type="button">Launch App</button>
+        <!-- MATCH SCREEN -->
+        <div id="match-screen" class="screen">
+            <!-- Scoreboard -->
+            <div class="scoreboard">
+                <div class="team-box away">
+                    <h3 id="display-away-name">Blades</h3>
+                    <div class="team-score" id="away-score">0</div>
+                </div>
+                <div class="match-meta">
+                    <span class="period-label">Period</span>
+                    <span class="period-number" id="current-period">1</span>
+                </div>
+                <div class="team-box home">
+                    <h3 id="display-home-name">Frost</h3>
+                    <div class="team-score" id="home-score">0</div>
+                </div>
+            </div>
+
+            <!-- Turn Banner -->
+            <div id="turn-banner" class="turn-banner">
+                <span id="turn-text">Home's Turn (Frost)</span>
+            </div>
+
+            <!-- Current Turn Throws -->
+            <div class="throw-log-container">
+                <label>Current Turn Throws</label>
+                <div class="throws-display">
+                    <div id="slot-0" class="throw-slot">-</div>
+                    <div id="slot-1" class="throw-slot">-</div>
+                    <div id="slot-2" class="throw-slot">-</div>
+                </div>
+            </div>
+
+            <!-- Keypad for Throw Entry -->
+            <div class="keypad">
+                <button class="key-btn" onclick="recordThrow('20')">20</button>
+                <button class="key-btn" onclick="recordThrow('19')">19</button>
+                <button class="key-btn" onclick="recordThrow('18')">18</button>
+                <button class="key-btn" onclick="recordThrow('17')">17</button>
+                
+                <button class="key-btn special" onclick="setMultiplier('T')">Triple</button>
+                <button class="key-btn special" onclick="setMultiplier('D')">Double</button>
+                <button class="key-btn" onclick="recordThrow('16')">16</button>
+                <button class="key-btn" onclick="recordThrow('15')">15</button>
+
+                <button class="key-btn special" onclick="setMultiplier('S')">Single</button>
+                <button class="key-btn" onclick="recordThrow('Bull')">Bull</button>
+                <button class="key-btn special" onclick="recordThrow('0')">Miss</button>
+                <button class="key-btn special" onclick="clearCurrentThrow()">Undo</button>
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-away" onclick="endTurn()">End Turn</button>
+                <button class="btn" onclick="nextPeriod()">Next Period</button>
+            </div>
         </div>
 
-        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-      </nav>
+        <!-- GAME OVER SCREEN -->
+        <div id="gameover-screen" class="screen">
+            <div class="winner-banner">
+                <h2 id="winner-title">Final Score</h2>
+                <p id="winner-subtitle" style="color: var(--text-muted); margin-bottom: 15px;"></p>
+                <button class="btn" onclick="resetGame()">New Match</button>
+            </div>
+        </div>
     </div>
-  </header>
 
-  <main>
-    <section class="hero">
-      <div class="container">
-        <div class="hero-shell">
-          <div class="hero-grid">
-            <div class="hero-copy stagger">
-              <div class="eyebrow">Fast throws. Clean scores. Rink mentality.</div>
-              <h1>Meet the <span class="accent">Hockey</span> Darts board.</h1>
-              <p class="hero-lead">
-                A competitive dart webapp inspired by the pressure, rhythm, and stat culture of hockey.
-                Track rounds like periods, throw with purpose, and run matches with a scoreboard that feels built for the arena.
-              </p>
+    <script>
+        let gameState = {
+            homeName: 'Frost',
+            awayName: 'Blades',
+            homeScore: 0,
+            awayScore: 0,
+            period: 1,
+            isHomeTurn: true, // true = Home, false = Away
+            currentThrows: [],
+            multiplier: 'S' // S, D, T
+        };
 
-              <div class="hero-actions">
-                <button class="btn btn-accent" type="button" id="startGameBtn">Start New Match</button>
-                <a class="btn btn-ghost" href="#experience">See Live Demo</a>
-              </div>
+        function startGame() {
+            const homeInput = document.getElementById('home-name').value.trim();
+            const awayInput = document.getElementById('away-name').value.trim();
 
-              <div class="hero-metrics">
-                <div class="metric">
-                  <strong>3</strong>
-                  <span>Periods per match</span>
-                </div>
-                <div class="metric">
-                  <strong>01</strong>
-                  <span>Tap scoring flow</span>
-                </div>
-                <div class="metric">
-                  <strong>∞</strong>
-                  <span>League-ready sessions</span>
-                </div>
-              </div>
-            </div>
+            if (homeInput) gameState.homeName = homeInput;
+            if (awayInput) gameState.awayName = awayInput;
 
-            <div class="hero-panel reveal">
-              <div class="scoreboard">
-                <div class="score-team away">
-                  <small>Away</small>
-                  <div class="score-value"><b>Blades</b><span id="awayScore">0</span></div>
-                </div>
-                <div class="score-center">
-                  <small>Period</small>
-                  <strong id="stageTitle">Period 1 - Away's turn</strong>
-                </div>
-                <div class="score-team home">
-                  <small>Home</small>
-                  <div class="score-value"><b>Frost</b><span id="homeScore">0</span></div>
-                </div>
-              </div>
+            document.getElementById('display-home-name').innerText = gameState.homeName;
+            document.getElementById('display-away-name').innerText = gameState.awayName;
 
-              <div class="rink" aria-hidden="true">
-                <div class="goal top"></div>
-                <div class="goal bottom"></div>
-                <div class="faceoff f1"></div>
-                <div class="faceoff f2"></div>
-                <div class="faceoff f3"></div>
-                <div class="faceoff f4"></div>
-                <div class="puck"></div>
-
-                <div class="dart d1">
-                  <svg viewBox="0 0 180 42" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="dart illustration">
-                    <polygon points="8,21 34,8 34,34" fill="#d7263d"/>
-                    <rect x="34" y="17" width="88" height="8" rx="4" fill="#10233f"/>
-                    <rect x="68" y="16" width="10" height="10" rx="2" fill="#ffd166"/>
-                    <rect x="92" y="16" width="10" height="10" rx="2" fill="#dff5ff"/>
-                    <polygon points="122,21 152,10 152,32" fill="#8ea2b8"/>
-                    <polygon points="152,10 172,21 152,32" fill="#f7fbff"/>
-                  </svg>
-                </div>
-
-                <div class="dart d2">
-                  <svg viewBox="0 0 180 42" xmlns="http://www.w3.org/2000/svg">
-                    <polygon points="8,21 34,8 34,34" fill="#10233f"/>
-                    <rect x="34" y="17" width="88" height="8" rx="4" fill="#d7263d"/>
-                    <rect x="60" y="16" width="10" height="10" rx="2" fill="#ffd166"/>
-                    <rect x="88" y="16" width="10" height="10" rx="2" fill="#dff5ff"/>
-                    <polygon points="122,21 152,10 152,32" fill="#8ea2b8"/>
-                    <polygon points="152,10 172,21 152,32" fill="#f7fbff"/>
-                  </svg>
-                </div>
-
-                <div class="dart d3">
-                  <svg viewBox="0 0 180 42" xmlns="http://www.w3.org/2000/svg">
-                    <polygon points="8,21 34,8 34,34" fill="#d7263d"/>
-                    <rect x="34" y="17" width="88" height="8" rx="4" fill="#10233f"/>
-                    <rect x="72" y="16" width="10" height="10" rx="2" fill="#ffd166"/>
-                    <rect x="98" y="16" width="10" height="10" rx="2" fill="#dff5ff"/>
-                    <polygon points="122,21 152,10 152,32" fill="#8ea2b8"/>
-                    <polygon points="152,10 172,21 152,32" fill="#f7fbff"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="ticker reveal">
-          <div class="ticker-track">
-            <div class="ticker-inner">
-              <div class="ticker-pill"><b>Shot Clock</b> rapid turn rotation with one-tap throw logging</div>
-              <div class="ticker-pill"><b>League Mode</b> preserve player stats across sessions</div>
-              <div class="ticker-pill"><b>Period Scoring</b> hockey-style match pacing and pressure</div>
-              <div class="ticker-pill"><b>Clean UI</b> scoreboard-first layout built for spectators</div>
-              <div class="ticker-pill"><b>Shot Clock</b> rapid turn rotation with one-tap throw logging</div>
-              <div class="ticker-pill"><b>League Mode</b> preserve player stats across sessions</div>
-              <div class="ticker-pill"><b>Period Scoring</b> hockey-style match pacing and pressure</div>
-              <div class="ticker-pill"><b>Clean UI</b> scoreboard-first layout built for spectators</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="features">
-      <div class="container">
-        <div class="section-head reveal">
-          <div>
-            <div class="eyebrow">Gameplay system</div>
-            <h2>Built like a scorekeeper’s dream.</h2>
-          </div>
-          <p>
-            Hockey Darts combines dart scoring with rink logic: periods, momentum, home-away identity,
-            and a board presentation that keeps players and spectators locked in without clutter.
-          </p>
-        </div>
-
-        <div class="arena-layout">
-          <div class="slab pad-lg reveal">
-            <div class="score-grid">
-              <article class="feature-block">
-                <div>
-                  <div class="index">01 / Match Flow</div>
-                  <h3>Three periods. Full pressure.</h3>
-                  <p>
-                    Split games into hockey-style periods to create momentum shifts, strategic pacing,
-                    and cleaner tournament structures.
-                  </p>
-                </div>
-                <div class="stat-ribbon">
-                  <span>Quick resets</span>
-                  <span>Pause anytime</span>
-                </div>
-              </article>
-
-              <article class="feature-block">
-                <div>
-                  <div class="index">02 / Team Identity</div>
-                  <h3>Home and away visual cues.</h3>
-                  <p>
-                    Color-led team tracking helps players read the match state instantly from across the room,
-                    just like a live arena board.
-                  </p>
-                </div>
-                <div class="stat-ribbon">
-                  <span>Custom names</span>
-                  <span>Color lockups</span>
-                </div>
-              </article>
-            </div>
-          </div>
-
-          <div class="feature-side reveal">
-            <div class="mini-score">
-              <div class="label">Current session</div>
-              <div class="big">118<br>AVG</div>
-              <p>
-                Live scoring summaries make every throw legible, from casual basement battles to league nights.
-              </p>
-            </div>
-
-            <div class="ice-diagram" aria-hidden="true">
-              <div class="chip c1">Bull = Breakaway</div>
-              <div class="chip c2">Triples swing momentum</div>
-              <div class="chip c3">Periods decide the winner</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="experience" class="experience">
-      <div class="container">
-        <div class="section-head reveal">
-          <div>
-            <div class="eyebrow">Live match view</div>
-            <h2>Run the room from one scoreboard.</h2>
-          </div>
-          <p>
-            Switch modes, track throws, and update the period score with a rhythm designed for real-time play.
-            The interface is optimized for touch, distance readability, and fast decisions under pressure.
-          </p>
-        </div>
-
-        <div class="experience-wrap">
-          <div class="slab pad-xl reveal">
-            <div class="timeline">
-              <div class="timeline-item">
-                <div class="timeline-badge">1</div>
-                <div>
-                  <h3>Choose your format</h3>
-                  <p>Play quick exhibition rounds or full league matches with multi-period scoring and saved player labels.</p>
-                </div>
-              </div>
-
-              <div class="timeline-item">
-                <div class="timeline-badge">2</div>
-                <div>
-                  <h3>Track every throw</h3>
-                  <p>Log each dart with fast inputs that surface key moments like closes, steals, and period-changing runs.</p>
-                </div>
-              </div>
-
-              <div class="timeline-item">
-                <div class="timeline-badge">3</div>
-                <div>
-                  <h3>Watch momentum shift</h3>
-                  <p>The scoreboard view emphasizes who is pressing, who is trailing, and when the match starts tilting.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="control-surface reveal">
-            <div class="control-top">
-              <div class="eyebrow">Interactive preview</div>
-              <div class="toggle-group" role="tablist" aria-label="Match mode">
-                <button class="chip-btn active" data-mode="classic" type="button">Classic</button>
-                <button class="chip-btn" data-mode="playoffs" type="button">Playoffs</button>
-                <button class="chip-btn" data-mode="rush" type="button">Rush</button>
-              </div>
-            </div>
-
-            <div class="score-stage" id="scoreStage">
-              <div class="stage-head">
-                <div class="stage-title" id="stageTitlePreview">Classic Match · Period 2</div>
-                <button class="btn btn-accent" type="button" id="simulateBtn">Simulate Shift</button>
-              </div>
-
-              <div class="stage-score">
-                <div class="stage-team">
-                  <small>Away</small>
-                  <strong id="awayScorePreview">4</strong>
-                </div>
-                <div class="stage-vs">VS</div>
-                <div class="stage-team">
-                  <small>Home</small>
-                  <strong id="homeScorePreview">6</strong>
-                </div>
-              </div>
-
-              <div class="throws">
-                <div class="throw-lane">
-                  <span>Throw 1</span>
-                  <b id="throw1Preview">T20</b>
-                  <em>opening strike</em>
-                </div>
-                <div class="throw-lane">
-                  <span>Throw 2</span>
-                  <b id="throw2Preview">D16</b>
-                  <em>clean follow-up</em>
-                </div>
-                <div class="throw-lane">
-                  <span>Throw 3</span>
-                  <b id="throw3Preview">Bull</b>
-                  <em>period closer</em>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="join" class="cta">
-      <div class="container">
-        <div class="cta-panel reveal">
-          <div class="cta-copy">
-            <div class="eyebrow">Join the league</div>
-            <h2>Turn your dart night into a season.</h2>
-            <p>
-              Launch Hockey Darts for house leagues, bars, tournaments, or private groups.
-              Keep the energy of the rink, the speed of a stat table, and the drama of a late-period comeback.
-            </p>
-
-            <div class="cta-stripes">
-              <span>Period scoring</span>
-              <span>Player stats</span>
-              <span>Touch-first controls</span>
-            </div>
-          </div>
-
-          <div class="cta-form">
-            <div class="form-shell">
-              <form>
-                <div class="field">
-                  <label for="name">League contact</label>
-                  <input id="name" type="text" placeholder="Your name" />
-                </div>
-                <div class="field">
-                  <label for="email">Email</label>
-                  <input id="email" type="email" placeholder="commissioner@hockeydarts.com" />
-                </div>
-                <div class="field">
-                  <label for="format">Preferred format</label>
-                  <select id="format">
-                    <option>Classic match</option>
-                    <option>Playoff bracket</option>
-                    <option>Rush mode</option>
-                    <option>League season</option>
-                  </select>
-                </div>
-                <p class="form-note">
-                  This is a concept landing page for the Hockey Darts webapp. Connect this form to your backend or Dart web service to collect signups.
-                </p>
-                <button class="btn btn-accent" type="submit" style="width:100%;">Request Early Access</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      <div class="footer-row">
-        <div><strong>Hockey Darts</strong> — score with rink-level intensity.</div>
-        <div>Designed as a distinctive Dart webapp concept UI.</div>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    // Navigation menu toggle
-    const menuToggle = document.getElementById('menuToggle');
-    const nav = document.getElementById('nav');
-
-    if (menuToggle) {
-      menuToggle.addEventListener('click', () => {
-        nav.classList.toggle('open');
-        const expanded = nav.classList.contains('open');
-        menuToggle.setAttribute('aria-expanded', expanded);
-      });
-    }
-
-    // Intersection observer for reveal animations
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('visible');
-      });
-    }, { threshold: 0.18 });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    // Playable game logic
-    const game = {
-      players: ['Away', 'Home'],
-      scores: [0, 0],
-      currentPeriod: 1,
-      maxPeriods: 3,
-      currentPlayerIndex: 0,
-      throwsThisTurn: 0,
-      maxThrowsPerTurn: 3,
-      isGameActive: false,
-    };
-
-    // UI elements
-    const startBtn = document.getElementById('startGameBtn');
-    const awayScoreEl = document.getElementById('awayScore');
-    const homeScoreEl = document.getElementById('homeScore');
-    const stageTitleEl = document.getElementById('stageTitle');
-    const throw1El = document.getElementById('throw1');
-    const throw2El = document.getElementById('throw2');
-    const throw3El = document.getElementById('throw3');
-    const simulateBtn = document.getElementById('simulateBtn');
-
-    // Possible dart scores for simulation
-    const dartScores = ['20', '19', '18', '17', '16', '15', 'Bull', 'D20', 'D16', 'T20', 'T19', '25'];
-
-    // Score values for scoring logic
-    const scoreValues = {
-      '20': 20,
-      '19': 19,
-      '18': 18,
-      '17': 17,
-      '16': 16,
-      '15': 15,
-      'Bull': 25,
-      '25': 25,
-      'D20': 40,
-      'D16': 32,
-      'T20': 60,
-      'T19': 57,
-    };
-
-    // Start new game
-    function startGame() {
-      game.scores = [0, 0];
-      game.currentPeriod = 1;
-      game.currentPlayerIndex = 0;
-      game.throwsThisTurn = 0;
-      game.isGameActive = true;
-      updateUI();
-      alert('Game started! Period 1, Away player to throw.');
-    }
-
-    // Update UI scoreboard and labels
-    function updateUI() {
-      awayScoreEl.textContent = game.scores[0];
-      homeScoreEl.textContent = game.scores[1];
-      stageTitleEl.textContent = `Period ${game.currentPeriod} - ${game.players[game.currentPlayerIndex]}'s turn`;
-
-      // Clear throws display
-      throw1El.textContent = '-';
-      throw2El.textContent = '-';
-      throw3El.textContent = '-';
-    }
-
-    // Simulate a dart throw
-    function simulateThrow() {
-      if (!game.isGameActive) {
-        alert('Start a new game first!');
-        return;
-      }
-
-      if (game.throwsThisTurn >= game.maxThrowsPerTurn) {
-        alert('Turn over! Switching player.');
-        nextTurn();
-        return;
-      }
-
-      // Pick a random dart score
-      const dart = dartScores[Math.floor(Math.random() * dartScores.length)];
-      const score = scoreValues[dart] || 0;
-
-      // Update player's score
-      game.scores[game.currentPlayerIndex] += score;
-
-      // Show dart throw in UI
-      if (game.throwsThisTurn === 0) throw1El.textContent = dart;
-      else if (game.throwsThisTurn === 1) throw2El.textContent = dart;
-      else if (game.throwsThisTurn === 2) throw3El.textContent = dart;
-
-      game.throwsThisTurn++;
-
-      // Update scoreboard
-      awayScoreEl.textContent = game.scores[0];
-      homeScoreEl.textContent = game.scores[1];
-
-      // If turn complete, switch player or period
-      if (game.throwsThisTurn === game.maxThrowsPerTurn) {
-        nextTurn();
-      }
-    }
-
-    // Switch to next player or next period
-    function nextTurn() {
-      game.throwsThisTurn = 0;
-      game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.length;
-
-      // If back to first player, increment period
-      if (game.currentPlayerIndex === 0) {
-        game.currentPeriod++;
-        if (game.currentPeriod > game.maxPeriods) {
-          endGame();
-          return;
+            switchScreen('match-screen');
+            updateUI();
         }
-      }
 
-      updateUI();
-    }
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
 
-    // End game and show winner
-    function endGame() {
-      game.isGameActive = false;
-      let winner = 'Tie';
-      if (game.scores[0] > game.scores[1]) winner = game.players[0];
-      else if (game.scores[1] > game.scores[0]) winner = game.players[1];
+        function setMultiplier(type) {
+            gameState.multiplier = type;
+            // Visual feedback could be added here
+        }
 
-      alert(`Game over! Winner: ${winner}`);
-      stageTitleEl.textContent = 'Game Over';
-    }
+        function recordThrow(target) {
+            if (gameState.currentThrows.length >= 3) return;
 
-    // Event listeners
-    startBtn.addEventListener('click', startGame);
-    simulateBtn.addEventListener('click', simulateThrow);
+            let formattedThrow = target;
+            if (target !== 'Bull' && target !== '0') {
+                if (gameState.multiplier === 'T') formattedThrow = 'T' + target;
+                else if (gameState.multiplier === 'D') formattedThrow = 'D' + target;
+            } else if (target === 'Bull' && gameState.multiplier === 'D') {
+                formattedThrow = 'DBull';
+            }
 
-    // Initialize UI
-    updateUI();
+            gameState.currentThrows.push({
+                rawTarget: target,
+                formatted: formattedThrow,
+                points: calculatePoints(formattedThrow)
+            });
 
-    // Preview mode toggle and simulate for demo panel
-    const modes = {
-      classic: {
-        title: 'Classic Match · Period 2',
-        away: 4,
-        home: 6,
-        throws: ['T20', 'D16', 'Bull']
-      },
-      playoffs: {
-        title: 'Playoff Match · Period 3',
-        away: 7,
-        home: 7,
-        throws: ['T19', 'T20', 'D20']
-      },
-      rush: {
-        title: 'Rush Mode · Final Minute',
-        away: 9,
-        home: 11,
-        throws: ['25', 'T18', 'D12']
-      }
-    };
+            // Reset multiplier to single after throw
+            gameState.multiplier = 'S';
+            updateUI();
+        }
 
-    const chipButtons = document.querySelectorAll('.chip-btn');
-    const stageTitlePreview = document.getElementById('stageTitlePreview');
-    const awayScorePreview = document.getElementById('awayScorePreview');
-    const homeScorePreview = document.getElementById('homeScorePreview');
-    const throw1Preview = document.getElementById('throw1Preview');
-    const throw2Preview = document.getElementById('throw2Preview');
-    const throw3Preview = document.getElementById('throw3Preview');
+        function calculatePoints(throwStr) {
+            if (throwStr === '0') return 0;
+            if (throwStr === 'Bull') return 25;
+            if (throwStr === 'DBull') return 50;
 
-    function setMode(mode){
-      const data = modes[mode];
-      if(!data) return;
-      stageTitlePreview.textContent = data.title;
-      awayScorePreview.textContent = data.away;
-      homeScorePreview.textContent = data.home;
-      throw1Preview.textContent = data.throws[0];
-      throw2Preview.textContent = data.throws[1];
-      throw3Preview.textContent = data.throws[2];
+            let mult = 1;
+            let base = parseInt(throwStr.slice(1));
+            if (throwStr.startsWith('T')) mult = 3;
+            if (throwStr.startsWith('D')) mult = 2;
 
-      chipButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
-    }
+            return base * mult;
+        }
 
-    chipButtons.forEach(btn => {
-      btn.addEventListener('click', () => setMode(btn.dataset.mode));
-    });
+        function clearCurrentThrow() {
+            gameState.currentThrows.pop();
+            updateUI();
+        }
 
-    setMode('classic');
+        function endTurn() {
+            // Sum points for this turn
+            const turnTotal = gameState.currentThrows.reduce((sum, t) => sum + t.points, 0);
 
-    // Simulate button for preview panel
-    const simulateBtnPreview = document.getElementById('simulateBtn');
-    const rotations = [
-      ['T20', 'D16', 'Bull'],
-      ['T19', 'T20', 'D18'],
-      ['Bull', '25', 'D20'],
-      ['T18', 'T17', 'D12'],
-      ['20', 'T20', 'T20']
-    ];
+            if (gameState.isHomeTurn) {
+                gameState.homeScore += turnTotal;
+            } else {
+                gameState.awayScore += turnTotal;
+            }
 
-    let tick = 0;
-    simulateBtnPreview.addEventListener('click', () => {
-      const currentAway = parseInt(awayScorePreview.textContent, 10);
-      const currentHome = parseInt(homeScorePreview.textContent, 10);
-      const awayBoost = Math.random() > 0.55 ? 1 : 0;
-      const homeBoost = Math.random() > 0.42 ? 1 : 0;
+            // Reset turn
+            gameState.currentThrows = [];
+            gameState.isHomeTurn = !gameState.isHomeTurn;
+            updateUI();
+        }
 
-      awayScorePreview.textContent = currentAway + awayBoost;
-      homeScorePreview.textContent = currentHome + homeBoost;
+        function nextPeriod() {
+            if (gameState.period < 3) {
+                gameState.period++;
+                gameState.isHomeTurn = true; // Home starts new period
+                gameState.currentThrows = [];
+                updateUI();
+            } else {
+                showGameOver();
+            }
+        }
 
-      const set = rotations[tick % rotations.length];
-      [throw1Preview.textContent, throw2Preview.textContent, throw3Preview.textContent] = set;
-      tick++;
+        function updateUI() {
+            document.getElementById('home-score').innerText = gameState.homeScore;
+            document.getElementById('away-score').innerText = gameState.awayScore;
+            document.getElementById('current-period').innerText = gameState.period;
 
-      simulateBtnPreview.style.transform = 'scale(.97)';
-      setTimeout(() => simulateBtnPreview.style.transform = '', 140);
-    });
-  </script>
+            // Turn Banner
+            const banner = document.getElementById('turn-banner');
+            const turnText = document.getElementById('turn-text');
+            if (gameState.isHomeTurn) {
+                banner.classList.remove('away-turn');
+                turnText.innerText = `Home's Turn (${gameState.homeName})`;
+            } else {
+                banner.classList.add('away-turn');
+                turnText.innerText = `Away's Turn (${gameState.awayName})`;
+            }
+
+            // Throws slots
+            for (let i = 0; i < 3; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                if (gameState.currentThrows[i]) {
+                    slot.innerText = gameState.currentThrows[i].formatted;
+                    slot.classList.add('filled');
+                } else {
+                    slot.innerText = '-';
+                    slot.classList.remove('filled');
+                }
+            }
+        }
+
+        function showGameOver() {
+            switchScreen('gameover-screen');
+            const title = document.getElementById('winner-title');
+            const subtitle = document.getElementById('winner-subtitle');
+
+            if (gameState.homeScore > gameState.awayScore) {
+                title.innerText = `${gameState.homeName} Wins!`;
+            } else if (gameState.awayScore > gameState.homeScore) {
+                title.innerText = `${gameState.awayName} Wins!`;
+            } else {
+                title.innerText = `Regulation Tie!`;
+            }
+            subtitle.innerText = `Final Score — ${gameState.awayName}: ${gameState.awayScore} | ${gameState.homeName}: ${gameState.homeScore}`;
+        }
+
+        function resetGame() {
+            gameState.homeScore = 0;
+            gameState.awayScore = 0;
+            gameState.period = 1;
+            gameState.isHomeTurn = true;
+            gameState.currentThrows = [];
+            switchScreen('setup-screen');
+        }
+    </script>
 </body>
 </html>
