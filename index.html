@@ -23,7 +23,7 @@
                     <p class="text-xs text-slate-400">The Official Dart-Hockey Simulation League</p>
                 </div>
             </div>
-
+            
             <!-- Game Clock / Period Display -->
             <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 gap-6 shadow-inner">
                 <div class="text-center">
@@ -41,7 +41,7 @@
 
     <!-- Main Scoreboard Arena -->
     <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-grow flex flex-col gap-6">
-
+        
         <!-- Scoreboard Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Home Team -->
@@ -52,9 +52,15 @@
                     <span id="home-name-label">Home Team</span>
                     <span id="home-goals" class="text-5xl font-scoreboard text-red-500">0</span>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-700/60 flex justify-between text-sm text-slate-300">
-                    <span>Current Turn Score: <strong id="home-current-score" class="text-white text-lg">0</strong></span>
-                    <span>Penalty Box: <strong id="home-penalty" class="text-amber-400">None</strong></span>
+                <div class="mt-4 pt-3 border-t border-slate-700/60 grid grid-cols-2 gap-2 text-xs text-slate-300">
+                    <div>Shots: <strong id="home-shots" class="text-white text-sm">0</strong></div>
+                    <div>Assists: <strong id="home-assists" class="text-white text-sm">0</strong></div>
+                    <div>Steals: <strong id="home-steals" class="text-white text-sm">0</strong></div>
+                    <div>Penalties: <strong id="home-penalties" class="text-white text-sm">0</strong></div>
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-700/40 flex justify-between text-xs text-slate-300">
+                    <span>Current Turn Score: <strong id="home-current-score" class="text-white">0</strong></span>
+                    <span>Box: <strong id="home-penalty-status" class="text-amber-400">None</strong></span>
                 </div>
             </div>
 
@@ -66,9 +72,15 @@
                     <span id="visitor-name-label">Visitor Team</span>
                     <span id="visitor-goals" class="text-5xl font-scoreboard text-blue-500">0</span>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-700/60 flex justify-between text-sm text-slate-300">
-                    <span>Current Turn Score: <strong id="visitor-current-score" class="text-white text-lg">0</strong></span>
-                    <span>Penalty Box: <strong id="visitor-penalty" class="text-amber-400">None</strong></span>
+                <div class="mt-4 pt-3 border-t border-slate-700/60 grid grid-cols-2 gap-2 text-xs text-slate-300">
+                    <div>Shots: <strong id="visitor-shots" class="text-white text-sm">0</strong></div>
+                    <div>Assists: <strong id="visitor-assists" class="text-white text-sm">0</strong></div>
+                    <div>Steals: <strong id="visitor-steals" class="text-white text-sm">0</strong></div>
+                    <div>Penalties: <strong id="visitor-penalties" class="text-white text-sm">0</strong></div>
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-700/40 flex justify-between text-xs text-slate-300">
+                    <span>Current Turn Score: <strong id="visitor-current-score" class="text-white">0</strong></span>
+                    <span>Box: <strong id="visitor-penalty-status" class="text-amber-400">None</strong></span>
                 </div>
             </div>
         </div>
@@ -91,11 +103,11 @@
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Dart 1 Score</label>
                     <input type="number" id="dart1" min="0" max="60" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
                 </div>
-                <div>
+                <div id="dart2-container">
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Dart 2 Score</label>
                     <input type="number" id="dart2" min="0" max="60" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
                 </div>
-                <div>
+                <div id="dart3-container">
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Dart 3 Score (or Penalty check)</label>
                     <input type="number" id="dart3" min="0" max="60" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
                 </div>
@@ -162,20 +174,15 @@
             <div class="overflow-y-auto flex flex-col gap-3 text-sm text-slate-300 pr-2">
                 <div>
                     <strong class="text-white block mb-1">1. Offense & Attack</strong>
-                    <p>The team with puck possession throws 3 darts to establish their offensive target score for the turn.</p>
+                    <p>The team with puck possession throws 3 darts (or 2 if serving a penalty) to establish their offensive target score.</p>
                 </div>
                 <div>
-                    <strong class="text-white block mb-1">2. Defense & Counter</strong>
-                    <p>The defending team throws their counter turn to defend against the target score:</p>
-                    <ul class="list-disc pl-5 mt-1 space-y-1 text-slate-400">
-                        <li><strong>Goal Scored:</strong> If the offensive score is higher than the defensive score, a goal is awarded to the attacking team.</li>
-                        <li><strong>Puck Steal:</strong> If the defender scores double or more of the offensive score, possession is successfully stolen!</li>
-                        <li><strong>Shot Defended:</strong> If the defender equals or exceeds the offensive score without doubling it, the shot is blocked and possession is retained.</li>
-                    </ul>
+                    <strong class="text-white block mb-1">2. Stats & Assists</strong>
+                    <p>Shots on goal and steals are tracked. If a goal is scored, an assist is awarded if Dart 3 > Dart 2, and another if Dart 2 > Dart 1.</p>
                 </div>
                 <div>
-                    <strong class="text-white block mb-1">3. Game Duration</strong>
-                    <p>Matches consist of three 20-minute periods plus overtime if regulation ends in a tie.</p>
+                    <strong class="text-white block mb-1">3. Penalties</strong>
+                    <p>If a player hits a miss (0) on Dart 3, their team is assessed a penalty and puts 1 player in the penalty box, restricting them to 2 darts on their next turn.</p>
                 </div>
             </div>
             <button onclick="closeRulesModal()" class="mt-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-xl transition">
@@ -196,13 +203,21 @@
             visitorName: "Boston Throwers",
             homeGoals: 0,
             visitorGoals: 0,
-            period: 1, // 1, 2, 3, 4 (OT)
-            minute: 1, // 1 to 20 per period
+            homeShots: 0,
+            visitorShots: 0,
+            homeSteals: 0,
+            visitorSteals: 0,
+            homeAssists: 0,
+            visitorAssists: 0,
+            homePenalties: 0,
+            visitorPenalties: 0,
+            homePenaltyMinutes: 0,
+            visitorPenaltyMinutes: 0,
+            period: 1,
+            minute: 1,
             possession: 'home', // 'home' or 'visitor'
             phase: 'offense_turn', // 'offense_turn' or 'defense_turn'
             offenseScoreThisTurn: 0,
-            homePenalty: 0,
-            visitorPenalty: 0,
             matchStarted: false
         };
 
@@ -213,17 +228,9 @@
             feed.scrollTop = feed.scrollHeight;
         }
 
-        function openSettingsModal() {
-            document.getElementById('setup-modal').classList.remove('hidden');
-        }
-
-        function openRulesModal() {
-            document.getElementById('rules-modal').classList.remove('hidden');
-        }
-
-        function closeRulesModal() {
-            document.getElementById('rules-modal').classList.add('hidden');
-        }
+        function openSettingsModal() { document.getElementById('setup-modal').classList.remove('hidden'); }
+        function openRulesModal() { document.getElementById('rules-modal').classList.remove('hidden'); }
+        function closeRulesModal() { document.getElementById('rules-modal').classList.add('hidden'); }
 
         function startMatch() {
             const hName = document.getElementById('setup-home-name').value.trim();
@@ -236,18 +243,25 @@
 
             gameState.homeGoals = 0;
             gameState.visitorGoals = 0;
+            gameState.homeShots = 0;
+            gameState.visitorShots = 0;
+            gameState.homeSteals = 0;
+            gameState.visitorSteals = 0;
+            gameState.homeAssists = 0;
+            gameState.visitorAssists = 0;
+            gameState.homePenalties = 0;
+            gameState.visitorPenalties = 0;
+            gameState.homePenaltyMinutes = 0;
+            gameState.visitorPenaltyMinutes = 0;
             gameState.period = 1;
             gameState.minute = 1;
             gameState.possession = 'home';
             gameState.phase = 'offense_turn';
-            gameState.homePenalty = 0;
-            gameState.visitorPenalty = 0;
             gameState.matchStarted = true;
 
             document.getElementById('setup-modal').classList.add('hidden');
             document.getElementById('input-section').classList.remove('opacity-50', 'pointer-events-none');
             document.getElementById('submit-btn').disabled = false;
-
             updateUI();
             logCommentary(`Match started! ${gameState.homeName} wins the opening faceoff and takes possession of the puck.`);
         }
@@ -255,6 +269,15 @@
         function updateUI() {
             document.getElementById('home-goals').innerText = gameState.homeGoals;
             document.getElementById('visitor-goals').innerText = gameState.visitorGoals;
+
+            document.getElementById('home-shots').innerText = gameState.homeShots;
+            document.getElementById('visitor-shots').innerText = gameState.visitorShots;
+            document.getElementById('home-steals').innerText = gameState.homeSteals;
+            document.getElementById('visitor-steals').innerText = gameState.visitorSteals;
+            document.getElementById('home-assists').innerText = gameState.homeAssists;
+            document.getElementById('visitor-assists').innerText = gameState.visitorAssists;
+            document.getElementById('home-penalties').innerText = gameState.homePenalties;
+            document.getElementById('visitor-penalties').innerText = gameState.visitorPenalties;
 
             // Period display
             let pText = "1st";
@@ -266,7 +289,7 @@
             let clockMin = 20 - gameState.minute;
             document.getElementById('clock-display').innerText = `${clockMin < 10 ? '0':''}${clockMin}:00`;
 
-            // Possession flags
+            // Possession flags & Penalty box visual cues
             const homePuck = document.getElementById('home-puck-indicator');
             const visitorPuck = document.getElementById('visitor-puck-indicator');
             const homeCard = document.getElementById('home-card');
@@ -284,11 +307,19 @@
                 visitorCard.classList.add('border-amber-500');
             }
 
-            // Penalties
-            document.getElementById('home-penalty').innerText = gameState.homePenalty > 0 ? `${gameState.homePenalty} min remaining` : 'None';
-            document.getElementById('visitor-penalty').innerText = gameState.visitorPenalty > 0 ? `${gameState.visitorPenalty} min remaining` : 'None';
+            document.getElementById('home-penalty-status').innerText = gameState.homePenaltyMinutes > 0 ? `${gameState.homePenaltyMinutes} min` : 'None';
+            document.getElementById('visitor-penalty-status').innerText = gameState.visitorPenaltyMinutes > 0 ? `${gameState.visitorPenaltyMinutes} min` : 'None';
 
-            // Active shooter banners & Tricky Bull indicator
+            // Check if current shooter has penalty box restriction (2 darts only)
+            const currentTeamInBox = gameState.possession === 'home' ? gameState.homePenaltyMinutes > 0 : gameState.visitorPenaltyMinutes > 0;
+            const dart3Container = document.getElementById('dart3-container');
+            if(gameState.phase === 'offense_turn' && currentTeamInBox) {
+                dart3Container.style.display = 'none';
+                document.getElementById('dart3').value = 0;
+            } else {
+                dart3Container.style.display = 'block';
+            }
+
             const offensiveTeam = gameState.possession === 'home' ? gameState.homeName : gameState.visitorName;
             const defensiveTeam = gameState.possession === 'home' ? gameState.visitorName : gameState.homeName;
             const titleElem = document.getElementById('active-shooter-title');
@@ -297,7 +328,7 @@
 
             if(gameState.phase === 'offense_turn') {
                 titleElem.innerText = `${offensiveTeam} (Offense - Shooting First)`;
-                descElem.innerText = `Throw 3 darts to establish the offensive target score.`;
+                descElem.innerText = currentTeamInBox ? `In Penalty Box! Restricted to 2 darts this turn.` : `Throw 3 darts to establish the offensive target score.`;
                 trickyBullBanner.classList.add('hidden');
             } else {
                 titleElem.innerText = `${defensiveTeam} (Defense - Counter Throw)`;
@@ -314,31 +345,60 @@
         function submitTurn() {
             const d1 = parseInt(document.getElementById('dart1').value) || 0;
             const d2 = parseInt(document.getElementById('dart2').value) || 0;
-            const d3 = parseInt(document.getElementById('dart3').value) || 0;
+            const currentTeamInBox = gameState.possession === 'home' ? gameState.homePenaltyMinutes > 0 : gameState.visitorPenaltyMinutes > 0;
+            const d3 = currentTeamInBox ? 0 : (parseInt(document.getElementById('dart3').value) || 0);
             const totalScore = d1 + d2 + d3;
 
             if(gameState.phase === 'offense_turn') {
                 gameState.offenseScoreThisTurn = totalScore;
                 const offensiveTeam = gameState.possession === 'home' ? gameState.homeName : gameState.visitorName;
+
+                // Track shot on goal
+                if(gameState.possession === 'home') gameState.homeShots++;
+                else gameState.visitorShots++;
+
+                // Penalty check: if Dart 3 is 0 (a miss) and not in penalty box restriction
+                if(!currentTeamInBox && d3 === 0) {
+                    if(gameState.possession === 'home') {
+                        gameState.homePenalties++;
+                        gameState.homePenaltyMinutes = 2;
+                    } else {
+                        gameState.visitorPenalties++;
+                        gameState.visitorPenaltyMinutes = 2;
+                    }
+                    logCommentary(`⚠️ PENALTY ASSESSED! ${offensiveTeam} hit a miss on Dart 3 and sends 1 player to the penalty box!`);
+                }
+
                 logCommentary(`${offensiveTeam} completes offensive turn with a score of ${totalScore} pts.`);
                 gameState.phase = 'defense_turn';
             } else {
                 const defensiveTeam = gameState.possession === 'home' ? gameState.visitorName : gameState.homeName;
                 const offensiveTeam = gameState.possession === 'home' ? gameState.homeName : gameState.visitorName;
                 const offScore = gameState.offenseScoreThisTurn;
-
+                
                 logCommentary(`${defensiveTeam} defends with a counter score of ${totalScore} pts.`);
 
                 let goalScored = false;
-                let puckStolen = false;
-
                 if(offScore > totalScore) {
                     goalScored = true;
                     if(gameState.possession === 'home') gameState.homeGoals++;
                     else gameState.visitorGoals++;
-                    logCommentary(`🚨 GOAL SCORED! ${offensiveTeam} converts on the attack! (${offScore} vs ${totalScore})`);
+
+                    // Calculate Assists: Dart 3 > Dart 2, and Dart 2 > Dart 1
+                    let assistsEarned = 0;
+                    if(d3 > d2) assistsEarned++;
+                    if(d2 > d1) assistsEarned++;
+
+                    if(assistsEarned > 0) {
+                        if(gameState.possession === 'home') gameState.homeAssists += assistsEarned;
+                        else gameState.visitorAssists += assistsEarned;
+                    }
+
+                    logCommentary(`🚨 GOAL SCORED! ${offensiveTeam} converts on the attack! (${offScore} vs ${totalScore}) ${assistsEarned > '0' ? `[+${assistsEarned} Assist(s)]`:''}`);
                 } else if(totalScore >= (offScore * 2) && offScore > 0) {
-                    puckStolen = true;
+                    if(gameState.possession === 'home') gameState.homeSteals++;
+                    else gameState.visitorSteals++;
+
                     gameState.possession = gameState.possession === 'home' ? 'visitor' : 'home';
                     logCommentary(`🔥 PUCK STOLEN! ${defensiveTeam} doubled the offensive score and takes possession!`);
                 } else {
@@ -358,8 +418,8 @@
 
         function advanceClock() {
             gameState.minute++;
-            if(gameState.homePenalty > 0) gameState.homePenalty--;
-            if(gameState.visitorPenalty > 0) gameState.visitorPenalty--;
+            if(gameState.homePenaltyMinutes > 0) gameState.homePenaltyMinutes--;
+            if(gameState.visitorPenaltyMinutes > 0) gameState.visitorPenaltyMinutes--;
 
             if(gameState.minute > 20) {
                 gameState.minute = 1;
@@ -377,7 +437,11 @@
         function endMatch() {
             const winner = gameState.homeGoals > gameState.visitorGoals ? gameState.homeName : gameState.visitorName;
             logCommentary(`🏆 FINAL HORN! Match Over. Winner: ${winner}!`);
-            alert(`Match Over! Winner: ${winner} 🎉`);
+            
+            alert(`Match Over! Winner: ${winner} 🎉\n\nFinal Stats:\n` +
+                  `${gameState.homeName} - Goals: ${gameState.homeGoals} | Shots: ${gameState.homeShots} | Steals: ${gameState.homeSteals} | Assists: ${gameState.homeAssists} | Penalties: ${gameState.homePenalties}\n` +
+                  `${gameState.visitorName} - Goals: ${gameState.visitorGoals} | Shots: ${gameState.visitorShots} | Steals: ${gameState.visitorSteals} | Assists: ${gameState.visitorAssists} | Penalties: ${gameState.visitorPenalties}`);
+
             gameState.matchStarted = false;
             document.getElementById('input-section').classList.add('opacity-50', 'pointer-events-none');
             document.getElementById('submit-btn').disabled = true;
