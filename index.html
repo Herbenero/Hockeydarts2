@@ -164,29 +164,52 @@
         </div>
     </div>
 
-    <!-- Rules Modal -->
+    <!-- Comprehensive Rules Modal -->
     <div id="rules-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-4 max-h-[85vh]">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl flex flex-col gap-4 max-h-[85vh]">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                <h2 class="text-xl font-bold text-white uppercase tracking-wide">📖 Hockey Darts Rules</h2>
+                <h2 class="text-xl font-bold text-white uppercase tracking-wide">📖 Official Hockey Darts Rules & Guide</h2>
                 <button onclick="closeRulesModal()" class="text-slate-400 hover:text-white font-bold text-lg px-2">&times;</button>
             </div>
-            <div class="overflow-y-auto flex flex-col gap-3 text-sm text-slate-300 pr-2">
+            
+            <div class="overflow-y-auto flex flex-col gap-4 text-xs text-slate-300 pr-2">
                 <div>
-                    <strong class="text-white block mb-1">1. Offense & Attack</strong>
-                    <p>The team with puck possession throws 3 darts (or 2 if serving a penalty) to establish their offensive target score.</p>
+                    <strong class="text-white text-sm block mb-1">1. Offensive Attack & Shots</strong>
+                    <p>The team with puck possession shoots first each round by throwing 3 darts to establish their offensive target score. Every completed offensive possession is recorded as a <strong>Shot on Goal</strong>.</p>
                 </div>
+
                 <div>
-                    <strong class="text-white block mb-1">2. Stats & Assists</strong>
-                    <p>Shots on goal and steals are tracked. If a goal is scored, an assist is awarded if Dart 3 > Dart 2, and another if Dart 2 > Dart 1.</p>
+                    <strong class="text-white text-sm block mb-1">2. Defensive Counter & Goals</strong>
+                    <p>The opposing team then takes a counter-throw. 
+                        <br>&bull; If the defense's counter score is <strong>lower</strong> than the offense's target, a <strong>Goal</strong> is scored.
+                        <br>&bull; If the defense's counter score equals or beats the target (without doubling it), they successfully block the shot—preventing a goal while keeping the puck.</p>
                 </div>
+
                 <div>
-                    <strong class="text-white block mb-1">3. Penalties</strong>
-                    <p>If a player hits a miss (0) on Dart 3, their team is assessed a penalty and puts 1 player in the penalty box, restricting them to 2 darts on their next turn.</p>
+                    <strong class="text-white text-sm block mb-1">3. Puck Steals</strong>
+                    <p>If the defending team's counter score is <strong>double or more</strong> than the offensive team's target score ($\text{totalScore} \ge \text{offScore} \times 2$), they execute a **Steal**, taking puck possession for the next turn.</p>
+                </div>
+
+                <div>
+                    <strong class="text-white text-sm block mb-1">4. Assists Calculations</strong>
+                    <p>When a goal is scored, assists are automatically evaluated based on progressive scoring progression across the three darts:
+                        <br>&bull; +1 Assist if <strong>Dart 3 > Dart 2</strong>
+                        <br>&bull; +1 Assist if <strong>Dart 2 > Dart 1</strong></p>
+                </div>
+
+                <div>
+                    <strong class="text-white text-sm block mb-1">5. Penalties & Penalty Box</strong>
+                    <p>If a player throws a miss (`0`) on <strong>Dart 3</strong> during an offensive turn, their team is assessed a penalty. One player is sent to the <strong>Penalty Box</strong> for 2 minutes, restricting that team to throwing only <strong>2 darts</strong> on their next offensive turn.</p>
+                </div>
+
+                <div>
+                    <strong class="text-white text-sm block mb-1">6. Game Duration & Overtime</strong>
+                    <p>The game consists of 3 regulation periods (20 minutes each). If scores are tied at the end of regulation, extra Overtime periods are played until a winner is decided.</p>
                 </div>
             </div>
+
             <button onclick="closeRulesModal()" class="mt-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-xl transition">
-                Got It
+                Got It, Back to Rink
             </button>
         </div>
     </div>
@@ -394,7 +417,7 @@
                         else gameState.visitorAssists += assistsEarned;
                     }
 
-                    logCommentary(`🚨 GOAL SCORED! ${offensiveTeam} converts on the attack! (${offScore} vs ${totalScore}) ${assistsEarned > '0' ? `[+${assistsEarned} Assist(s)]`:''}`);
+                    logCommentary(`🚨 GOAL SCORED! ${offensiveTeam} converts on the attack! (${offScore} vs ${totalScore}) ${assistsEarned > 0 ? `[+${assistsEarned} Assist(s)]`:''}`);
                 } else if(totalScore >= (offScore * 2) && offScore > 0) {
                     if(gameState.possession === 'home') gameState.homeSteals++;
                     else gameState.visitorSteals++;
