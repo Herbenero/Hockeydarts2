@@ -20,7 +20,7 @@
                 <span class="text-3xl">🏒</span>
                 <div>
                     <h1 class="text-2xl font-black uppercase tracking-wider text-red-500 font-scoreboard">Hockey Darts Arena</h1>
-                    <p class="text-xs text-slate-400">The Official Dart-Hockey Simulation League</p>
+                    <p id="board-type-badge" class="text-xs text-amber-400 font-semibold uppercase tracking-wider">Board: Standard</p>
                 </div>
             </div>
             
@@ -152,6 +152,23 @@
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Visitor Team Name</label>
                     <input type="text" id="setup-visitor-name" value="Boston Throwers" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
                 </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Board Type</label>
+                        <select id="setup-board-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
+                            <option value="Standard">Standard</option>
+                            <option value="Quadro">Quadro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Period Length</label>
+                        <select id="setup-period-length" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
+                            <option value="5">5 min (Quick Game)</option>
+                            <option value="10">10 min (Short Game)</option>
+                            <option value="20" selected>20 min (Full Game)</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="flex gap-2 mt-2">
                 <button onclick="startMatch()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition shadow-lg">
@@ -204,7 +221,7 @@
 
                 <div>
                     <strong class="text-white text-sm block mb-1">6. Game Duration & Overtime</strong>
-                    <p>The game consists of 3 regulation periods (20 minutes each). If scores are tied at the end of regulation, extra Overtime periods are played until a winner is decided.</p>
+                    <p>The game consists of 3 regulation periods. If scores are tied at the end of regulation, extra Overtime periods are played until a winner is decided.</p>
                 </div>
             </div>
 
@@ -224,6 +241,8 @@
         let gameState = {
             homeName: "Montreal Darts",
             visitorName: "Boston Throwers",
+            boardType: "Standard",
+            periodLength: 20,
             homeGoals: 0,
             visitorGoals: 0,
             homeShots: 0,
@@ -246,7 +265,8 @@
 
         function logCommentary(msg) {
             const feed = document.getElementById('commentary-log');
-            const timeStr = `P${gameState.period} - ${21 - gameState.minute}:00`;
+            const maxMin = gameState.periodLength;
+            const timeStr = `P${gameState.period} - ${maxMin + 1 - gameState.minute}:00`;
             feed.innerHTML += `<div class="text-slate-300"><span class="text-slate-500">[${timeStr}]</span> ${msg}</div>`;
             feed.scrollTop = feed.scrollHeight;
         }
@@ -258,11 +278,17 @@
         function startMatch() {
             const hName = document.getElementById('setup-home-name').value.trim();
             const vName = document.getElementById('setup-visitor-name').value.trim();
+            const bType = document.getElementById('setup-board-type').value;
+            const pLength = parseInt(document.getElementById('setup-period-length').value) || 20;
+
             if(hName) gameState.homeName = hName;
             if(vName) gameState.visitorName = vName;
+            gameState.boardType = bType;
+            gameState.periodLength = pLength;
 
             document.getElementById('home-name-label').innerText = gameState.homeName;
             document.getElementById('visitor-name-label').innerText = gameState.visitorName;
+            document.getElementById('board-type-badge').innerText = `Board: ${gameState.boardType}`;
 
             gameState.homeGoals = 0;
             gameState.visitorGoals = 0;
@@ -286,7 +312,7 @@
             document.getElementById('input-section').classList.remove('opacity-50', 'pointer-events-none');
             document.getElementById('submit-btn').disabled = false;
             updateUI();
-            logCommentary(`Match started! ${gameState.homeName} wins the opening faceoff and takes possession of the puck.`);
+            logCommentary(`Match started on ${gameState.boardType} board (${gameState.periodLength} min periods)! ${gameState.homeName} wins opening faceoff.`);
         }
 
         function updateUI() {
@@ -309,7 +335,7 @@
             if(gameState.period >= 4) pText = `OT ${gameState.period - 3}`;
             document.getElementById('period-display').innerText = pText;
 
-            let clockMin = 20 - gameState.minute;
+            let clockMin = gameState.periodLength - gameState.minute + 1;
             document.getElementById('clock-display').innerText = `${clockMin < 10 ? '0':''}${clockMin}:00`;
 
             // Possession flags & Penalty box visual cues
@@ -336,6 +362,12 @@
             // Check if current shooter has penalty box restriction (2 darts only)
             const currentTeamInBox = gameState.possession === 'home' ? gameState.homePenaltyMinutes > 0 : gameState.visitorPenaltyMinutes > 0;
             const dart3Container = document.getElementById('dart3-container');
+            const maxScorePerDart = gameState.boardType === 'Quadro' ? 80 : 60;
+            
+            document.getElementById('dart1').max = maxScorePerDart;
+            document.getElementById('dart2').max = maxScorePerDart;
+            document.getElementById('dart3').max = maxScorePerDart;
+
             if(gameState.phase === 'offense_turn' && currentTeamInBox) {
                 dart3Container.style.display = 'none';
                 document.getElementById('dart3').value = 0;
@@ -444,7 +476,7 @@
             if(gameState.homePenaltyMinutes > 0) gameState.homePenaltyMinutes--;
             if(gameState.visitorPenaltyMinutes > 0) gameState.visitorPenaltyMinutes--;
 
-            if(gameState.minute > 20) {
+            if(gameState.minute > gameState.periodLength) {
                 gameState.minute = 1;
                 gameState.period++;
                 logCommentary(`--- PERIOD ${gameState.period - 1} ENDED --- Score: ${gameState.homeName} ${gameState.homeGoals} - ${gameState.visitorGoals} ${gameState.visitorName}`);
