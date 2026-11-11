@@ -136,7 +136,7 @@
             border: none;
             color: #ff5555;
             padding: 0;
-            font-size: 1.1em;
+            font-size: 1.1 em;
             cursor: pointer;
         }
 
@@ -374,12 +374,16 @@
 
             completedEvents.forEach(evt => {
                 const gameName = evt.eventName || "Unknown Game";
+                const lowerGameName = gameName.trim().toLowerCase();
+                // Check if this game tracks lowest score as best record
+                const isLowScoreGame = (lowerGameName === "301" || lowerGameName === "golf");
 
                 if (!gameRecords[gameName]) {
                     gameRecords[gameName] = {
-                        highScore: null,
+                        bestScore: null,
                         recordHolders: [],
-                        subscoreRecords: {}
+                        subscoreRecords: {},
+                        isLowScore: isLowScoreGame
                     };
                 }
 
@@ -387,14 +391,30 @@
                     evt.results.forEach(res => {
                         if (res.score !== undefined && !isNaN(res.score)) {
                             const scoreNum = Number(res.score);
-                            const currentRecord = gameRecords[gameName].highScore;
+                            const currentRecord = gameRecords[gameName].bestScore;
 
-                            if (currentRecord === null || scoreNum > currentRecord.score) {
-                                gameRecords[gameName].highScore = { score: scoreNum, name: res.name };
+                            if (currentRecord === null) {
+                                gameRecords[gameName].bestScore = scoreNum;
                                 gameRecords[gameName].recordHolders = [res.name];
-                            } else if (scoreNum === currentRecord.score) {
-                                if (!gameRecords[gameName].recordHolders.includes(res.name)) {
-                                    gameRecords[gameName].recordHolders.push(res.name);
+                            } else {
+                                if (isLowScoreGame) {
+                                    if (scoreNum < currentRecord) {
+                                        gameRecords[gameName].bestScore = scoreNum;
+                                        gameRecords[gameName].recordHolders = [res.name];
+                                    } else if (scoreNum === currentRecord) {
+                                        if (!gameRecords[gameName].recordHolders.includes(res.name)) {
+                                            gameRecords[gameName].recordHolders.push(res.name);
+                                        }
+                                    }
+                                } else {
+                                    if (scoreNum > currentRecord) {
+                                        gameRecords[gameName].bestScore = scoreNum;
+                                        gameRecords[gameName].recordHolders = [res.name];
+                                    } else if (scoreNum === currentRecord) {
+                                        if (!gameRecords[gameName].recordHolders.includes(res.name)) {
+                                            gameRecords[gameName].recordHolders.push(res.name);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -431,12 +451,13 @@
                     subscoresHtml += '</div>';
                 }
 
-                const holdersText = data.highScore ? `${data.highScore.score} pts — <strong>${data.recordHolders.join(', ')}</strong>` : 'No scores logged yet';
+                const labelType = data.isLowScore ? 'Best Low Score' : 'High Score';
+                const holdersText = data.bestScore !== null ? `${data.bestScore} pts — <strong>${data.recordHolders.join(', ')}</strong>` : 'No scores logged yet';
 
                 recordsHtml += `
                     <div style="background: #252525; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; margin-bottom: 10px;">
                         <div style="color: var(--gold); font-size: 1.05em; font-weight: bold; margin-bottom: 4px;">🎯 ${gameName}</div>
-                        <div style="font-size: 0.95em;">🏆 High Score: ${holdersText}</div>
+                        <div style="font-size: 0.95em;">🏆 ${labelType}: ${holdersText}</div>
                         ${subscoresHtml}
                     </div>
                 `;
@@ -447,7 +468,7 @@
                     <div style="background: var(--card-bg); padding: 25px; border-radius: 8px; max-width: 580px; width: 90%; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color); position: relative;">
                         <button onclick="document.getElementById('league-records-modal').remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: white; font-size: 1.3em; cursor: pointer;">✖</button>
                         <h2 style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">🏆 ${currentLeagueName} Records</h2>
-                        <p style="margin-top: 0; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px;">All-time high scores and personal best breakdowns.</p>
+                        <p style="margin-top: 0; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px;">All-time records and personal best breakdowns.</p>
                         <div>
                             ${recordsHtml}
                         </div>
@@ -845,14 +866,21 @@
                 }
             });
             let isNewRecord = false;
+            const lowerEvtName = eventName.trim().toLowerCase();
+            const isLowScoreGame = (lowerEvtName === "301" || lowerEvtName === "golf");
+
             if (pastScores.length === 0) {
                 isNewRecord = true;
             } else {
-                let currentBest = scoringMetric === 'High Score Wins' ? Math.max(...pastScores) : Math.min(...pastScores);
-                if (scoringMetric === 'High Score Wins' && scoreValue > currentBest) {
-                    isNewRecord = true;
-                } else if (scoringMetric === 'Low Score Wins (Time/Penalty)' && scoreValue < currentBest) {
-                    isNewRecord = true;
+                let currentBest = isLowScoreGame ? Math.min(...pastScores) : (scoringMetric === 'High Score Wins' ? Math.max(...pastScores) : Math.min(...pastScores));
+                if (isLowScoreGame) {
+                    if (scoreValue < currentBest) isNewRecord = true;
+                } else {
+                    if (scoringMetric === 'High Score Wins' && scoreValue > currentBest) {
+                        isNewRecord = true;
+                    } else if (scoringMetric === 'Low Score Wins (Time/Penalty)' && scoreValue < currentBest) {
+                        isNewRecord = true;
+                    }
                 }
             }
             if (isNewRecord) {
@@ -862,7 +890,7 @@
                     if (subscoreName) {
                         bannerText.textContent = `🎯 New Subscore Record! ${athleteName} set a record in ${subscoreName} (${eventName}): ${scoreValue}!`;
                     } else {
-                        bannerText.textContent = `🌟 New Match Record! ${athleteName} set a new high score for ${eventName}: ${scoreValue}!`;
+                        bannerText.textContent = `🌟 New Record! ${athleteName} set a new best for ${eventName}: ${scoreValue}!`;
                     }
                     banner.classList.add('show');
                     setTimeout(() => { banner.classList.remove('show'); }, 4500);
