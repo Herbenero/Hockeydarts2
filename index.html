@@ -3,504 +3,1190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hockey Darts Live Arena</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>🏆 Hellcastle Archery Arena League</title>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .font-scoreboard { font-family: 'Teko', sans-serif; letter-spacing: 0.05em; }
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #4CAF50;
+            --accent-hover: #45a049;
+            --danger-color: #e53935;
+            --danger-hover: #c62828;
+            --text-color: #ffffff;
+            --text-muted: #b0b0b0;
+            --border-color: #333333;
+            --input-bg: #2a2a2a;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.85)), url('Archery.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; width: 100%; }
+        h1, h2, h3 { text-align: center; color: var(--gold); }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 200px; display: flex; flex-direction: column; }
+        label { font-size: 0.9em; margin-bottom: 5px; color: var(--text-muted); }
+        input, select, button {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1em;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--accent-color); }
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: var(--accent-hover); }
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tag button { background: none; border: none; color: #ff5555; padding: 0; font-size: 1.1em; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background-color: var(--input-bg); color: var(--gold); }
+        tr:nth-child(1) td:first-child { color: var(--gold); font-weight: bold; }
+        tr:nth-child(2) td:first-child { color: var(--silver); font-weight: bold; }
+        tr:nth-child(3) td:first-child { color: var(--bronze); font-weight: bold; }
+        #current-league-header {
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--accent-color);
+            margin-top: -10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        #high-score-banner {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50px);
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            color: #ffffff;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        #high-score-banner.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between bg-[url('hockey1.png')] bg-cover bg-center bg-no-repeat bg-blend-overlay">
+<body>
 
-    <!-- Header / Rink Banner -->
-    <header class="bg-slate-950 border-b border-slate-800 py-4 shadow-lg">
-        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <span class="text-3xl">🏒</span>
-                <div>
-                    <h1 class="text-2xl font-black uppercase tracking-wider text-red-500 font-scoreboard">Hockey Darts Arena</h1>
-                    <p id="board-type-badge" class="text-xs text-amber-400 font-semibold uppercase tracking-wider">Board: Standard</p>
-                </div>
-            </div>
-            
-            <!-- Game Clock / Period Display -->
-            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 gap-6 shadow-inner">
-                <div class="text-center">
-                    <div class="text-xs text-slate-400 uppercase font-semibold">Period</div>
-                    <div id="period-display" class="text-xl font-bold font-scoreboard text-amber-400">1st</div>
-                </div>
-                <div class="h-8 w-px bg-slate-700"></div>
-                <div class="text-center">
-                    <div class="text-xs text-slate-400 uppercase font-semibold">Clock</div>
-                    <div id="clock-display" class="text-xl font-bold font-scoreboard text-emerald-400">20:00</div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <div id="high-score-banner">
+        🏆 <span id="banner-text">New High Score Set!</span>
+    </div>
 
-    <!-- Main Scoreboard Arena -->
-    <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-grow flex flex-col gap-6">
-        
-        <!-- Scoreboard Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Home Team -->
-            <div id="home-card" class="bg-slate-800/80 border-2 border-slate-700 rounded-2xl p-5 shadow-xl relative overflow-hidden transition-all">
-                <div id="home-puck-indicator" class="absolute top-3 right-3 hidden bg-amber-500 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse">Puck Possession 🏒</div>
-                <div class="text-xs uppercase font-semibold text-slate-400 tracking-wider">Home Club</div>
-                <div class="text-2xl font-bold text-slate-100 flex items-center justify-between mt-1">
-                    <span id="home-name-label">Home Team</span>
-                    <span id="home-goals" class="text-5xl font-scoreboard text-red-500">0</span>
-                </div>
-                <div class="mt-4 pt-3 border-t border-slate-700/60 grid grid-cols-2 gap-2 text-xs text-slate-300">
-                    <div>Shots: <strong id="home-shots" class="text-white text-sm">0</strong></div>
-                    <div>Assists: <strong id="home-assists" class="text-white text-sm">0</strong></div>
-                    <div>Steals: <strong id="home-steals" class="text-white text-sm">0</strong></div>
-                    <div>Penalties: <strong id="home-penalties" class="text-white text-sm">0</strong></div>
-                </div>
-                <div class="mt-2 pt-2 border-t border-slate-700/40 flex justify-between text-xs text-slate-300">
-                    <span>Current Turn Score: <strong id="home-current-score" class="text-white">0</strong></span>
-                    <span>Box: <strong id="home-penalty-status" class="text-amber-400">None</strong></span>
-                </div>
-            </div>
+    <div class="container">
+        <h1>🏆 Hellcastle Archery Arena League</h1>
 
-            <!-- Visitor Team -->
-            <div id="visitor-card" class="bg-slate-800/80 border-2 border-slate-700 rounded-2xl p-5 shadow-xl relative overflow-hidden transition-all">
-                <div id="visitor-puck-indicator" class="absolute top-3 right-3 hidden bg-amber-500 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse">Puck Possession 🏒</div>
-                <div class="text-xs uppercase font-semibold text-slate-400 tracking-wider">Visiting Club</div>
-                <div class="text-2xl font-bold text-slate-100 flex items-center justify-between mt-1">
-                    <span id="visitor-name-label">Visitor Team</span>
-                    <span id="visitor-goals" class="text-5xl font-scoreboard text-blue-500">0</span>
+        <!-- 1. League & Setup Management -->
+        <div class="card">
+            <h2>1. Active League Setup</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="league-select">Continue Saved League</label>
+                    <select id="league-select" onchange="loadSelectedLeague()">
+                        <option value="">-- Select Existing League --</option>
+                    </select>
                 </div>
-                <div class="mt-4 pt-3 border-t border-slate-700/60 grid grid-cols-2 gap-2 text-xs text-slate-300">
-                    <div>Shots: <strong id="visitor-shots" class="text-white text-sm">0</strong></div>
-                    <div>Assists: <strong id="visitor-assists" class="text-white text-sm">0</strong></div>
-                    <div>Steals: <strong id="visitor-steals" class="text-white text-sm">0</strong></div>
-                    <div>Penalties: <strong id="visitor-penalties" class="text-white text-sm">0</strong></div>
-                </div>
-                <div class="mt-2 pt-2 border-t border-slate-700/40 flex justify-between text-xs text-slate-300">
-                    <span>Current Turn Score: <strong id="visitor-current-score" class="text-white">0</strong></span>
-                    <span>Box: <strong id="visitor-penalty-status" class="text-amber-400">None</strong></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Action / Throw Input Terminal -->
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-lg flex flex-col gap-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-3">
-                <div>
-                    <h2 id="active-shooter-title" class="text-lg font-bold text-slate-200">Match Setup Required</h2>
-                    <p id="active-role-desc" class="text-sm text-slate-400">Configure teams and start the match to enter the rink.</p>
-                </div>
-                <div id="tricky-bull-banner" class="hidden bg-red-950/80 border border-red-600 text-red-300 px-3 py-1 rounded-lg text-xs font-semibold animate-bounce">
-                    🎯 TRICKY BULL ACTIVE: Bull value = <span id="tricky-bull-value">50</span> pts
-                </div>
-            </div>
-
-            <!-- Dart Input Form -->
-            <div id="input-section" class="grid grid-cols-1 sm:grid-cols-3 gap-4 opacity-50 pointer-events-none">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Dart 1 Score</label>
-                    <input type="number" id="dart1" min="0" max="60" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
-                </div>
-                <div id="dart2-container">
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Dart 2 Score</label>
-                    <input type="number" id="dart2" min="0" max="60" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
-                </div>
-                <div id="dart3-container">
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Dart 3 Score (or Penalty check)</label>
-                    <input type="number" id="dart3" min="0" max="60" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-3 justify-between items-center pt-2">
-                <div class="flex gap-2 flex-wrap">
-                    <button onclick="submitTurn()" id="submit-btn" disabled class="bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:hover:bg-red-600 text-white font-bold px-6 py-2.5 rounded-xl transition shadow-lg">
-                        Submit Turn 🎯
-                    </button>
-                    <button onclick="openSettingsModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition">
-                        Team Setup / Reset
-                    </button>
-                    <button onclick="openRulesModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-4 py-2.5 rounded-xl transition">
-                        📖 Rules
-                    </button>
-                </div>
-                <div id="game-status-message" class="text-sm font-medium text-amber-400"></div>
-            </div>
-        </div>
-
-        <!-- Play-by-Play Commentary Log -->
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col h-40">
-            <h3 class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-2">Live Play-by-Play Feed</h3>
-            <div id="commentary-log" class="overflow-y-auto flex flex-col gap-1.5 text-xs text-slate-300 font-mono pr-2">
-                <div class="text-slate-500">[00:00] Arena initialized. Configure teams to drop the puck.</div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Setup / Settings Modal -->
-    <div id="setup-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
-            <h2 class="text-xl font-bold text-white uppercase tracking-wide">Match Setup</h2>
-            <div class="flex flex-col gap-3">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Home Team Name</label>
-                    <input type="text" id="setup-home-name" value="Montreal Darts" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Visitor Team Name</label>
-                    <input type="text" id="setup-visitor-name" value="Boston Throwers" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Board Type</label>
-                        <select id="setup-board-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
-                            <option value="Standard">Standard</option>
-                            <option value="Quadro">Quadro</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Period Length</label>
-                        <select id="setup-period-length" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-red-500">
-                            <option value="5">5 min (Quick Game)</option>
-                            <option value="10">10 min (Short Game)</option>
-                            <option value="20" selected>20 min (Full Game)</option>
-                        </select>
+                <div class="form-group">
+                    <label for="league-name-input">Create New League Name</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="league-name-input" placeholder="e.g. HAAL #1" style="flex: 1;">
+                        <button id="set-league-btn" onclick="setActiveLeague()">Set League</button>
                     </div>
                 </div>
             </div>
-            <div class="flex gap-2 mt-2">
-                <button onclick="startMatch()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition shadow-lg">
-                    Drop Puck & Start Match 🏒
-                </button>
-                <button onclick="openRulesModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-4 py-3 rounded-xl transition">
-                    📖 Rules
-                </button>
+            <div id="current-league-header">
+                <span>Current Active League: <strong id="current-league-text">Hellcastle Archery League</strong></span>
+                <button class="btn-danger" style="padding: 4px 10px; font-size: 0.85em;" onclick="deleteCurrentLeague()">🗑️ Delete League</button>
             </div>
+            <hr style="border-color: var(--border-color); margin: 20px 0;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Add Combatant / Player Name</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="player-input" placeholder="Enter player name" style="flex: 1;">
+                        <button onclick="addPlayer()">Add</button>
+                    </div>
+                    <div id="player-tags" class="tags"></div>
+                </div>
+                <div class="form-group">
+                    <label>Add Event Name</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="event-input" placeholder="Enter event name" style="flex: 1;">
+                        <button onclick="addEvent()">Add</button>
+                    </div>
+                    <div id="event-tags" class="tags"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Event Scoring -->
+        <div class="card">
+            <h2>2. Enter Event Results</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="event-select">Select Event</label>
+                    <select id="event-select" onchange="renderScoreInputs()">
+                        <option value="">-- Choose Event --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="score-type">Scoring Metric</label>
+                    <select id="score-type">
+                        <option value="high">High Score Wins</option>
+                        <option value="low">Low Score Wins (Time/Penalty)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-date">Event Date & Time</label>
+                    <input type="datetime-local" id="event-date">
+                </div>
+            </div>
+            <div id="score-inputs-container"></div>
+        </div>
+
+        <!-- 3. Leaderboard -->
+        <div class="card">
+            <h2>🏆 Standings Leaderboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Athlete</th>
+                        <th>Total Points</th>
+                        <th>Wins (W)</th>
+                        <th>Losses (L)</th>
+                        <th>Ties (T)</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Standings populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 4. Completed Event Log -->
+        <div class="card">
+            <h2>📜 Event Log</h2>
+            <div id="completed-events-log"></div>
         </div>
     </div>
 
-    <!-- Comprehensive Rules Modal -->
-    <div id="rules-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl flex flex-col gap-4 max-h-[85vh]">
-            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                <h2 class="text-xl font-bold text-white uppercase tracking-wide">📖 Official Hockey Darts Rules & Guide</h2>
-                <button onclick="closeRulesModal()" class="text-slate-400 hover:text-white font-bold text-lg px-2">&times;</button>
-            </div>
-            
-            <div class="overflow-y-auto flex flex-col gap-4 text-xs text-slate-300 pr-2">
-                <div>
-                    <strong class="text-white text-sm block mb-1">1. Offensive Attack & Shots</strong>
-                    <p>The team with puck possession shoots first each round by throwing 3 darts to establish their offensive target score. Every completed offensive possession is recorded as a <strong>Shot on Goal</strong>.</p>
-                </div>
+    <!-- Main Application Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-                <div>
-                    <strong class="text-white text-sm block mb-1">2. Defensive Counter & Goals</strong>
-                    <p>The opposing team then takes a counter-throw. 
-                        <br>&bull; If the defense's counter score is <strong>lower</strong> than the offense's target, a <strong>Goal</strong> is scored.
-                        <br>&bull; If the defense's counter score equals or beats the target (without doubling it), they successfully block the shot—preventing a goal while keeping the puck.</p>
-                </div>
-
-                <div>
-                    <strong class="text-white text-sm block mb-1">3. Puck Steals</strong>
-                    <p>If the defending team's counter score is <strong>double or more</strong> than the offensive team's target score ($\text{totalScore} \ge \text{offScore} \times 2$), they execute a **Steal**, taking puck possession for the next turn.</p>
-                </div>
-
-                <div>
-                    <strong class="text-white text-sm block mb-1">4. Assists Calculations</strong>
-                    <p>When a goal is scored, assists are automatically evaluated based on progressive scoring progression across the three darts:
-                        <br>&bull; +1 Assist if <strong>Dart 3 > Dart 2</strong>
-                        <br>&bull; +1 Assist if <strong>Dart 2 > Dart 1</strong></p>
-                </div>
-
-                <div>
-                    <strong class="text-white text-sm block mb-1">5. Penalties & Penalty Box</strong>
-                    <p>If a player throws a miss (`0`) on <strong>Dart 3</strong> during an offensive turn, their team is assessed a penalty. One player is sent to the <strong>Penalty Box</strong> for 2 minutes, restricting that team to throwing only <strong>2 darts</strong> on their next offensive turn.</p>
-                </div>
-
-                <div>
-                    <strong class="text-white text-sm block mb-1">6. Game Duration & Overtime</strong>
-                    <p>The game consists of 3 regulation periods. If scores are tied at the end of regulation, extra Overtime periods are played until a winner is decided.</p>
-                </div>
-            </div>
-
-            <button onclick="closeRulesModal()" class="mt-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-xl transition">
-                Got It, Back to Rink
-            </button>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/80">
-        Hockey Darts WebApp &bull; Rule engine based on authentic Dart Hockey gameplay standards.
-    </footer>
-
-    <!-- JavaScript Application Logic -->
-    <script>
-        let gameState = {
-            homeName: "Montreal Darts",
-            visitorName: "Boston Throwers",
-            boardType: "Standard",
-            periodLength: 20,
-            homeGoals: 0,
-            visitorGoals: 0,
-            homeShots: 0,
-            visitorShots: 0,
-            homeSteals: 0,
-            visitorSteals: 0,
-            homeAssists: 0,
-            visitorAssists: 0,
-            homePenalties: 0,
-            visitorPenalties: 0,
-            homePenaltyMinutes: 0,
-            visitorPenaltyMinutes: 0,
-            period: 1,
-            minute: 1,
-            possession: 'home', // 'home' or 'visitor'
-            phase: 'offense_turn', // 'offense_turn' or 'defense_turn'
-            offenseScoreThisTurn: 0,
-            matchStarted: false
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvL2K8R82qk3fG4EEKZ6sOIiieLcCKckA",
+            authDomain: "haal-fc862.firebaseapp.com",
+            projectId: "haal-fc862",
+            storageBucket: "haal-fc862.firebasestorage.app",
+            messagingSenderId: "1077392905739",
+            appId: "1:1077392905739:web:cc047fae886356663fd90e",
+            measurementId: "G-P99RVN1XBF"
         };
 
-        function logCommentary(msg) {
-            const feed = document.getElementById('commentary-log');
-            const maxMin = gameState.periodLength;
-            const timeStr = `P${gameState.period} - ${maxMin + 1 - gameState.minute}:00`;
-            feed.innerHTML += `<div class="text-slate-300"><span class="text-slate-500">[${timeStr}]</span> ${msg}</div>`;
-            feed.scrollTop = feed.scrollHeight;
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        function openSettingsModal() { document.getElementById('setup-modal').classList.remove('hidden'); }
-        function openRulesModal() { document.getElementById('rules-modal').classList.remove('hidden'); }
-        function closeRulesModal() { document.getElementById('rules-modal').classList.add('hidden'); }
+        // Application State
+        let currentLeagueName = "Hellcastle Archery League";
+        let editingIndex = null;
+        const players = [];
+        const events = [];
+        const completedEvents = [];
+        const pointsMap = { 1: 25, 2: 20, 3: 15 };
 
-        function startMatch() {
-            const hName = document.getElementById('setup-home-name').value.trim();
-            const vName = document.getElementById('setup-visitor-name').value.trim();
-            const bType = document.getElementById('setup-board-type').value;
-            const pLength = parseInt(document.getElementById('setup-period-length').value) || 20;
-
-            if(hName) gameState.homeName = hName;
-            if(vName) gameState.visitorName = vName;
-            gameState.boardType = bType;
-            gameState.periodLength = pLength;
-
-            document.getElementById('home-name-label').innerText = gameState.homeName;
-            document.getElementById('visitor-name-label').innerText = gameState.visitorName;
-            document.getElementById('board-type-badge').innerText = `Board: ${gameState.boardType}`;
-
-            gameState.homeGoals = 0;
-            gameState.visitorGoals = 0;
-            gameState.homeShots = 0;
-            gameState.visitorShots = 0;
-            gameState.homeSteals = 0;
-            gameState.visitorSteals = 0;
-            gameState.homeAssists = 0;
-            gameState.visitorAssists = 0;
-            gameState.homePenalties = 0;
-            gameState.visitorPenalties = 0;
-            gameState.homePenaltyMinutes = 0;
-            gameState.visitorPenaltyMinutes = 0;
-            gameState.period = 1;
-            gameState.minute = 1;
-            gameState.possession = 'home';
-            gameState.phase = 'offense_turn';
-            gameState.matchStarted = true;
-
-            document.getElementById('setup-modal').classList.add('hidden');
-            document.getElementById('input-section').classList.remove('opacity-50', 'pointer-events-none');
-            document.getElementById('submit-btn').disabled = false;
-            updateUI();
-            logCommentary(`Match started on ${gameState.boardType} board (${gameState.periodLength} min periods)! ${gameState.homeName} wins opening faceoff.`);
-        }
-
-        function updateUI() {
-            document.getElementById('home-goals').innerText = gameState.homeGoals;
-            document.getElementById('visitor-goals').innerText = gameState.visitorGoals;
-
-            document.getElementById('home-shots').innerText = gameState.homeShots;
-            document.getElementById('visitor-shots').innerText = gameState.visitorShots;
-            document.getElementById('home-steals').innerText = gameState.homeSteals;
-            document.getElementById('visitor-steals').innerText = gameState.visitorSteals;
-            document.getElementById('home-assists').innerText = gameState.homeAssists;
-            document.getElementById('visitor-assists').innerText = gameState.visitorAssists;
-            document.getElementById('home-penalties').innerText = gameState.homePenalties;
-            document.getElementById('visitor-penalties').innerText = gameState.visitorPenalties;
-
-            // Period display
-            let pText = "1st";
-            if(gameState.period === 2) pText = "2nd";
-            if(gameState.period === 3) pText = "3rd";
-            if(gameState.period >= 4) pText = `OT ${gameState.period - 3}`;
-            document.getElementById('period-display').innerText = pText;
-
-            let clockMin = gameState.periodLength - gameState.minute + 1;
-            document.getElementById('clock-display').innerText = `${clockMin < 10 ? '0':''}${clockMin}:00`;
-
-            // Possession flags & Penalty box visual cues
-            const homePuck = document.getElementById('home-puck-indicator');
-            const visitorPuck = document.getElementById('visitor-puck-indicator');
-            const homeCard = document.getElementById('home-card');
-            const visitorCard = document.getElementById('visitor-card');
-
-            if(gameState.possession === 'home') {
-                homePuck.classList.remove('hidden');
-                visitorPuck.classList.add('hidden');
-                homeCard.classList.add('border-amber-500');
-                visitorCard.classList.remove('border-amber-500');
-            } else {
-                homePuck.classList.add('hidden');
-                visitorPuck.classList.remove('hidden');
-                homeCard.classList.remove('border-amber-500');
-                visitorCard.classList.add('border-amber-500');
-            }
-
-            document.getElementById('home-penalty-status').innerText = gameState.homePenaltyMinutes > 0 ? `${gameState.homePenaltyMinutes} min` : 'None';
-            document.getElementById('visitor-penalty-status').innerText = gameState.visitorPenaltyMinutes > 0 ? `${gameState.visitorPenaltyMinutes} min` : 'None';
-
-            // Check if current shooter has penalty box restriction (2 darts only)
-            const currentTeamInBox = gameState.possession === 'home' ? gameState.homePenaltyMinutes > 0 : gameState.visitorPenaltyMinutes > 0;
-            const dart3Container = document.getElementById('dart3-container');
-            const maxScorePerDart = gameState.boardType === 'Quadro' ? 80 : 60;
-            
-            document.getElementById('dart1').max = maxScorePerDart;
-            document.getElementById('dart2').max = maxScorePerDart;
-            document.getElementById('dart3').max = maxScorePerDart;
-
-            if(gameState.phase === 'offense_turn' && currentTeamInBox) {
-                dart3Container.style.display = 'none';
-                document.getElementById('dart3').value = 0;
-            } else {
-                dart3Container.style.display = 'block';
-            }
-
-            const offensiveTeam = gameState.possession === 'home' ? gameState.homeName : gameState.visitorName;
-            const defensiveTeam = gameState.possession === 'home' ? gameState.visitorName : gameState.homeName;
-            const titleElem = document.getElementById('active-shooter-title');
-            const descElem = document.getElementById('active-role-desc');
-            const trickyBullBanner = document.getElementById('tricky-bull-banner');
-
-            if(gameState.phase === 'offense_turn') {
-                titleElem.innerText = `${offensiveTeam} (Offense - Shooting First)`;
-                descElem.innerText = currentTeamInBox ? `In Penalty Box! Restricted to 2 darts this turn.` : `Throw 3 darts to establish the offensive target score.`;
-                trickyBullBanner.classList.add('hidden');
-            } else {
-                titleElem.innerText = `${defensiveTeam} (Defense - Counter Throw)`;
-                descElem.innerText = `Defending against ${offensiveTeam}'s score of ${gameState.offenseScoreThisTurn}. Equal or higher score defends, double steals puck!`;
-                if(gameState.offenseScoreThisTurn > 50) {
-                    trickyBullBanner.classList.remove('hidden');
-                    document.getElementById('tricky-bull-value').innerText = gameState.offenseScoreThisTurn;
-                } else {
-                    trickyBullBanner.classList.add('hidden');
-                }
+        function setNowDate() {
+            const dateInput = document.getElementById('event-date');
+            if (dateInput) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                dateInput.value = now.toISOString().slice(0, 16);
             }
         }
 
-        function submitTurn() {
-            const d1 = parseInt(document.getElementById('dart1').value) || 0;
-            const d2 = parseInt(document.getElementById('dart2').value) || 0;
-            const currentTeamInBox = gameState.possession === 'home' ? gameState.homePenaltyMinutes > 0 : gameState.visitorPenaltyMinutes > 0;
-            const d3 = currentTeamInBox ? 0 : (parseInt(document.getElementById('dart3').value) || 0);
-            const totalScore = d1 + d2 + d3;
+        function getSanitizedDocId(name) {
+            return name ? name.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_') : '';
+        }
 
-            if(gameState.phase === 'offense_turn') {
-                gameState.offenseScoreThisTurn = totalScore;
-                const offensiveTeam = gameState.possession === 'home' ? gameState.homeName : gameState.visitorName;
+        async function syncLeagueToFirebase() {
+            const sanitizedDocId = getSanitizedDocId(currentLeagueName);
+            if (!sanitizedDocId) return;
+            const leagueRef = doc(db, "leagues", sanitizedDocId);
+            try {
+                await setDoc(leagueRef, {
+                    leagueName: currentLeagueName,
+                    lastUpdated: serverTimestamp(),
+                    completedEvents: completedEvents
+                }, { merge: true });
+                await fetchSavedLeagues();
+            } catch (error) {
+                console.error("Error saving league to Firebase: ", error);
+            }
+        }
 
-                // Track shot on goal
-                if(gameState.possession === 'home') gameState.homeShots++;
-                else gameState.visitorShots++;
+        async function updatePlayerProfiles(eventRecord) {
+            const rankCounts = {};
+            eventRecord.results.forEach(res => {
+                rankCounts[res.rank] = (rankCounts[res.rank] || 0) + 1;
+            });
 
-                // Penalty check: if Dart 3 is 0 (a miss) and not in penalty box restriction
-                if(!currentTeamInBox && d3 === 0) {
-                    if(gameState.possession === 'home') {
-                        gameState.homePenalties++;
-                        gameState.homePenaltyMinutes = 2;
+            const matchKey = `${currentLeagueName}_${eventRecord.eventName}_${eventRecord.date || eventRecord.timestamp}`.trim().toLowerCase();
+
+            for (const res of eventRecord.results) {
+                const playerRef = doc(db, "players", res.name.trim());
+                const isTie = rankCounts[res.rank] > 1;
+                const newMatchEntry = {
+                    matchId: matchKey,
+                    event: eventRecord.eventName,
+                    league: currentLeagueName,
+                    score: res.score,
+                    rank: res.rank,
+                    isTie: isTie,
+                    points: res.points || 0,
+                    subscores: res.subscores || {},
+                    notes: res.notes || '',
+                    date: eventRecord.date || eventRecord.timestamp
+                };
+
+                try {
+                    const docSnap = await getDoc(playerRef);
+                    let history = [];
+                    if (docSnap.exists()) {
+                        history = docSnap.data().gameHistory || [];
+                    }
+
+                    const existingIdx = history.findIndex(h => {
+                        const hKey = h.matchId || `${h.league}_${h.event}_${h.date}`.trim().toLowerCase();
+                        return hKey === matchKey;
+                    });
+
+                    if (existingIdx > -1) {
+                        history[existingIdx] = newMatchEntry;
                     } else {
-                        gameState.visitorPenalties++;
-                        gameState.visitorPenaltyMinutes = 2;
+                        history.push(newMatchEntry);
                     }
-                    logCommentary(`⚠️ PENALTY ASSESSED! ${offensiveTeam} hit a miss on Dart 3 and sends 1 player to the penalty box!`);
+
+                    let lifetimePts = 0;
+                    let lifetimeWins = 0;
+                    let lifetimeLosses = 0;
+                    let lifetimeTies = 0;
+
+                    history.forEach(m => {
+                        lifetimePts += (m.points || 0);
+                        if (m.isTie) {
+                            lifetimeTies++;
+                        } else if (m.rank === 1) {
+                            lifetimeWins++;
+                        } else if (m.rank > 1) {
+                            lifetimeLosses++;
+                        }
+                    });
+
+                    await setDoc(playerRef, {
+                        name: res.name.trim(),
+                        totalPoints: lifetimePts,
+                        wins: lifetimeWins,
+                        losses: lifetimeLosses,
+                        ties: lifetimeTies,
+                        gamesPlayed: history.length,
+                        gameHistory: history
+                    }, { merge: true });
+                } catch (err) {
+                    console.error(`Error updating player profile for ${res.name}:`, err);
+                }
+            }
+        }
+
+        async function fetchSavedLeagues() {
+            const select = document.getElementById('league-select');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Select Existing League --</option>';
+            const seenLeagues = new Set();
+            try {
+                const querySnapshot = await getDocs(collection(db, "leagues"));
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const name = data.leagueName || docSnap.id;
+                    if (name) {
+                        const normalized = name.trim().toLowerCase();
+                        if (!seenLeagues.has(normalized)) {
+                            seenLeagues.add(normalized);
+                            const opt = document.createElement('option');
+                            opt.value = name;
+                            opt.textContent = name;
+                            if (name.toLowerCase() === currentLeagueName.toLowerCase()) {
+                                opt.selected = true;
+                            }
+                            select.appendChild(opt);
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error fetching leagues:", err);
+            }
+        }
+
+        async function setActiveLeague() {
+            const input = document.getElementById('league-name-input');
+            const name = input ? input.value.trim() : '';
+            if (!name) {
+                alert("Please enter a valid league name.");
+                return;
+            }
+            currentLeagueName = name;
+            document.getElementById('current-league-text').textContent = currentLeagueName;
+            players.length = 0;
+            events.length = 0;
+            completedEvents.length = 0;
+            editingIndex = null;
+            renderSetupUI();
+            updateLeaderboard();
+            renderCompletedEvents();
+            await syncLeagueToFirebase();
+            if (input) input.value = '';
+        }
+
+        async function loadSelectedLeague() {
+            const select = document.getElementById('league-select');
+            const leagueName = select.value;
+            if (!leagueName) return;
+            currentLeagueName = leagueName;
+            document.getElementById('current-league-text').textContent = currentLeagueName;
+
+            const sanitizedDocId = getSanitizedDocId(leagueName);
+            const leagueRef = doc(db, "leagues", sanitizedDocId);
+
+            try {
+                let docSnap = await getDoc(leagueRef);
+                if (!docSnap.exists()) {
+                    const allLeaguesSnap = await getDocs(collection(db, "leagues"));
+                    for (const lDoc of allLeaguesSnap.docs) {
+                        const data = lDoc.data();
+                        if ((data.leagueName && data.leagueName.trim().toLowerCase() === leagueName.toLowerCase()) || lDoc.id.toLowerCase() === leagueName.toLowerCase()) {
+                            docSnap = lDoc;
+                            break;
+                        }
+                    }
                 }
 
-                logCommentary(`${offensiveTeam} completes offensive turn with a score of ${totalScore} pts.`);
-                gameState.phase = 'defense_turn';
-            } else {
-                const defensiveTeam = gameState.possession === 'home' ? gameState.visitorName : gameState.homeName;
-                const offensiveTeam = gameState.possession === 'home' ? gameState.homeName : gameState.visitorName;
-                const offScore = gameState.offenseScoreThisTurn;
-                
-                logCommentary(`${defensiveTeam} defends with a counter score of ${totalScore} pts.`);
+                if (docSnap && docSnap.exists()) {
+                    const data = docSnap.data();
+                    completedEvents.length = 0;
+                    players.length = 0;
+                    events.length = 0;
+                    editingIndex = null;
 
-                let goalScored = false;
-                if(offScore > totalScore) {
-                    goalScored = true;
-                    if(gameState.possession === 'home') gameState.homeGoals++;
-                    else gameState.visitorGoals++;
-
-                    // Calculate Assists: Dart 3 > Dart 2, and Dart 2 > Dart 1
-                    let assistsEarned = 0;
-                    if(d3 > d2) assistsEarned++;
-                    if(d2 > d1) assistsEarned++;
-
-                    if(assistsEarned > 0) {
-                        if(gameState.possession === 'home') gameState.homeAssists += assistsEarned;
-                        else gameState.visitorAssists += assistsEarned;
+                    if (data.completedEvents) {
+                        completedEvents.push(...data.completedEvents);
+                        data.completedEvents.forEach(evt => {
+                            if (evt.eventName && !events.includes(evt.eventName)) {
+                                events.push(evt.eventName);
+                            }
+                            evt.results.forEach(res => {
+                                if (res.name && !players.includes(res.name)) {
+                                    players.push(res.name);
+                                }
+                            });
+                        });
                     }
+                    renderSetupUI();
+                    updateLeaderboard();
+                    renderCompletedEvents();
+                }
+            } catch (err) {
+                console.error("Error loading league data:", err);
+            }
+        }
 
-                    logCommentary(`🚨 GOAL SCORED! ${offensiveTeam} converts on the attack! (${offScore} vs ${totalScore}) ${assistsEarned > 0 ? `[+${assistsEarned} Assist(s)]`:''}`);
-                } else if(totalScore >= (offScore * 2) && offScore > 0) {
-                    if(gameState.possession === 'home') gameState.homeSteals++;
-                    else gameState.visitorSteals++;
+        async function deleteCurrentLeague() {
+            if (!confirm(`Are you sure you want to permanently delete the active league "${currentLeagueName}"?`)) {
+                return;
+            }
+            const sanitizedDocId = getSanitizedDocId(currentLeagueName);
+            const leagueRef = doc(db, "leagues", sanitizedDocId);
+            try {
+                await deleteDoc(leagueRef);
+                alert(`League "${currentLeagueName}" deleted successfully.`);
+                currentLeagueName = "Hellcastle Archery League";
+                document.getElementById('current-league-text').textContent = currentLeagueName;
+                players.length = 0;
+                events.length = 0;
+                completedEvents.length = 0;
+                editingIndex = null;
+                renderSetupUI();
+                updateLeaderboard();
+                renderCompletedEvents();
+                await fetchSavedLeagues();
+            } catch (err) {
+                console.error("Error deleting league:", err);
+                alert("Failed to delete league from database.");
+            }
+        }
 
-                    gameState.possession = gameState.possession === 'home' ? 'visitor' : 'home';
-                    logCommentary(`🔥 PUCK STOLEN! ${defensiveTeam} doubled the offensive score and takes possession!`);
+        function addPlayer() {
+            const input = document.getElementById('player-input');
+            const name = input.value.trim();
+            if (name && !players.includes(name)) {
+                players.push(name);
+                input.value = '';
+                renderSetupUI();
+            }
+        }
+
+        function removePlayer(name) {
+            const idx = players.indexOf(name);
+            if (idx > -1) {
+                players.splice(idx, 1);
+                renderSetupUI();
+            }
+        }
+
+        function addEvent() {
+            const input = document.getElementById('event-input');
+            const name = input.value.trim();
+            if (name && !events.includes(name)) {
+                events.push(name);
+                input.value = '';
+                renderSetupUI();
+            }
+        }
+
+        function removeEvent(name) {
+            const idx = events.indexOf(name);
+            if (idx > -1) {
+                events.splice(idx, 1);
+                renderSetupUI();
+            }
+        }
+
+        function renderSetupUI() {
+            const playerTags = document.getElementById('player-tags');
+            if (playerTags) {
+                playerTags.innerHTML = players.map(p => `
+                    <span class="tag">${p} <button onclick="removePlayer('${p}')">&times;</button></span>
+                `).join('');
+            }
+            const eventTags = document.getElementById('event-tags');
+            if (eventTags) {
+                eventTags.innerHTML = events.map(e => `
+                    <span class="tag">${e} <button onclick="removeEvent('${e}')">&times;</button></span>
+                `).join('');
+            }
+            const select = document.getElementById('event-select');
+            if (select) {
+                select.innerHTML = '<option value="">-- Choose Event --</option>' + events.map(e => `<option value="${e}">${e}</option>`).join('');
+            }
+        }
+
+        function renderScoreInputs(prefillData = null) {
+            const container = document.getElementById('score-inputs-container');
+            const eventSelect = document.getElementById('event-select');
+            if (!eventSelect || !container) return;
+            const eventName = eventSelect.value;
+            if (!eventName || players.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const isJdcJr = eventName === "JDC Jr";
+            const isSnapshot = eventName === "Snapshot";
+            const isShoveAPenny = eventName === "Shove a Penny";
+
+            let html = '<div style="margin-top: 15px;">';
+            players.forEach(p => {
+                let existingScore = '';
+                let existingSubs = {};
+                let existingNotes = '';
+                if (prefillData && prefillData.results) {
+                    const match = prefillData.results.find(r => r.name === p);
+                    if (match) {
+                        existingScore = match.score !== undefined ? match.score : '';
+                        existingSubs = match.subscores || {};
+                        existingNotes = match.notes || '';
+                    }
+                }
+
+                if (isJdcJr) {
+                    const cb = existingSubs["Coloring Book"] !== undefined ? existingSubs["Coloring Book"] : '';
+                    const bb = existingSubs["Bit of Bully"] !== undefined ? existingSubs["Bit of Bully"] : '';
+                    const r180 = existingSubs["Race to 180"] !== undefined ? existingSubs["Race to 180"] : '';
+                    html += `
+                        <div class="card" style="margin-bottom: 10px; padding: 12px; background: #222;">
+                            <strong>${p}</strong>
+                            <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                <input type="number" class="jdc-sub" data-player="${p}" value="${cb}" placeholder="Coloring Book" style="flex: 1; min-width: 100px;" oninput="calcJdcTotal('${p}')">
+                                <input type="number" class="jdc-sub" data-player="${p}" value="${bb}" placeholder="Bit of Bully" style="flex: 1; min-width: 100px;" oninput="calcJdcTotal('${p}')">
+                                <input type="number" class="jdc-sub" data-player="${p}" value="${r180}" placeholder="Race to 180" style="flex: 1; min-width: 100px;" oninput="calcJdcTotal('${p}')">
+                                <input type="number" class="player-score-field" id="total-${p}" data-player="${p}" value="${existingScore}" placeholder="Total" style="flex: 1; min-width: 100px; font-weight: bold; border-color: var(--gold);" readonly>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <input type="text" class="player-notes-field" data-player="${p}" value="${existingNotes}" placeholder="Add notes or remarks for ${p}..." style="width: 100%; font-size: 0.9em;">
+                            </div>
+                        </div>
+                    `;
+                } else if (isSnapshot) {
+                    const fp = existingSubs["Flash Point"] !== undefined ? existingSubs["Flash Point"] : '';
+                    const ndc = existingSubs["9 Dart Century"] !== undefined ? existingSubs["9 Dart Century"] : '';
+                    const qd = existingSubs["Quick Draw"] !== undefined ? existingSubs["Quick Draw"] : '';
+                    html += `
+                        <div class="card" style="margin-bottom: 10px; padding: 12px; background: #222;">
+                            <strong>${p}</strong>
+                            <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                <input type="number" class="snap-sub" data-player="${p}" value="${fp}" placeholder="Flash Point" style="flex: 1; min-width: 100px;" oninput="calcSnapTotal('${p}')">
+                                <input type="number" class="snap-sub" data-player="${p}" value="${ndc}" placeholder="9 Dart Century" style="flex: 1; min-width: 100px;" oninput="calcSnapTotal('${p}')">
+                                <input type="number" class="snap-sub" data-player="${p}" value="${qd}" placeholder="Quick Draw" style="flex: 1; min-width: 100px;" oninput="calcSnapTotal('${p}')">
+                                <input type="number" class="player-score-field" id="total-${p}" data-player="${p}" value="${existingScore}" placeholder="Total" style="flex: 1; min-width: 100px; font-weight: bold; border-color: var(--gold);" readonly>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <input type="text" class="player-notes-field" data-player="${p}" value="${existingNotes}" placeholder="Add notes or remarks for ${p}..." style="width: 100%; font-size: 0.9em;">
+                            </div>
+                        </div>
+                    `;
+                } else if (isShoveAPenny) {
+                    const marks = existingSubs["Marks"] !== undefined ? existingSubs["Marks"] : '';
+                    const pushed = existingSubs["Pushed"] !== undefined ? existingSubs["Pushed"] : '';
+                    const received = existingSubs["Received"] !== undefined ? existingSubs["Received"] : '';
+                    html += `
+                        <div class="card" style="margin-bottom: 10px; padding: 12px; background: #222;">
+                            <strong>${p}</strong>
+                            <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                <input type="number" class="shove-sub" data-player="${p}" value="${marks}" placeholder="Marks" style="flex: 1; min-width: 100px;" oninput="calcShoveTotal('${p}')">
+                                <input type="number" class="shove-sub" data-player="${p}" value="${pushed}" placeholder="Pushed" style="flex: 1; min-width: 100px;" oninput="calcShoveTotal('${p}')">
+                                <input type="number" class="shove-sub" data-player="${p}" value="${received}" placeholder="Received" style="flex: 1; min-width: 100px;" oninput="calcShoveTotal('${p}')">
+                                <input type="number" class="player-score-field" id="total-${p}" data-player="${p}" value="${existingScore}" placeholder="Total" style="flex: 1; min-width: 100px; font-weight: bold; border-color: var(--gold);" readonly>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <input type="text" class="player-notes-field" data-player="${p}" value="${existingNotes}" placeholder="Add notes or remarks for ${p}..." style="width: 100%; font-size: 0.9em;">
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    logCommentary(`🛡️ Shot defended successfully by ${defensiveTeam}. No goal scored, possession retained.`);
+                    html += `
+                        <div class="card" style="margin-bottom: 10px; padding: 12px; background: #222;">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+                                <label style="width: 150px; margin: 0; color: var(--text-color);">${p}</label>
+                                <input type="number" class="player-score-field" data-player="${p}" value="${existingScore}" placeholder="Enter score" style="flex: 1;">
+                            </div>
+                            <div>
+                                <input type="text" class="player-notes-field" data-player="${p}" value="${existingNotes}" placeholder="Add notes or remarks for ${p}..." style="width: 100%; font-size: 0.9em;">
+                            </div>
+                        </div>
+                    `;
                 }
+            });
 
-                advanceClock();
-                gameState.phase = 'offense_turn';
-                gameState.offenseScoreThisTurn = 0;
+            const btnLabel = editingIndex !== null ? 'Update Event Scores' : 'Submit Scores';
+            html += `<button onclick="submitEventScores()">${btnLabel}</button></div>`;
+            container.innerHTML = html;
+        }
+
+        window.calcJdcTotal = function(player) {
+            const inputs = document.querySelectorAll(`.jdc-sub[data-player="${player}"]`);
+            let sum = 0;
+            inputs.forEach(i => { sum += parseFloat(i.value) || 0; });
+            const totalElem = document.getElementById(`total-${player}`);
+            if (totalElem) totalElem.value = sum;
+        };
+
+        window.calcSnapTotal = function(player) {
+            const inputs = document.querySelectorAll(`.snap-sub[data-player="${player}"]`);
+            let sum = 0;
+            inputs.forEach(i => { sum += parseFloat(i.value) || 0; });
+            const totalElem = document.getElementById(`total-${player}`);
+            if (totalElem) totalElem.value = sum;
+        };
+
+        window.calcShoveTotal = function(player) {
+            const marksInput = document.querySelector(`.shove-sub[data-player="${player}"][placeholder="Marks"]`);
+            const receivedInput = document.querySelector(`.shove-sub[data-player="${player}"][placeholder="Received"]`);
+            const marks = parseFloat(marksInput ? marksInput.value : 0) || 0;
+            const received = parseFloat(receivedInput ? receivedInput.value : 0) || 0;
+            const sum = marks + received;
+            const totalElem = document.getElementById(`total-${player}`);
+            if (totalElem) totalElem.value = sum;
+        };
+
+        function checkAndDisplayHighScore(eventName, athleteName, scoreValue, scoringMetric, subscoreName = null) {
+            let pastScores = [];
+
+            completedEvents.forEach((evt, idx) => {
+                if (editingIndex !== null && idx === editingIndex) return; 
+                if (evt.eventName === eventName && evt.results) {
+                    evt.results.forEach(res => {
+                        if (subscoreName) {
+                            if (res.subscores && res.subscores[subscoreName] !== undefined && !isNaN(res.subscores[subscoreName])) {
+                                pastScores.push(Number(res.subscores[subscoreName]));
+                            }
+                        } else {
+                            if (res.score !== undefined && !isNaN(res.score)) {
+                                pastScores.push(Number(res.score));
+                            }
+                        }
+                    });
+                }
+            });
+
+            let isNewRecord = false;
+            if (pastScores.length === 0) {
+                isNewRecord = true; 
+            } else {
+                let currentBest = scoringMetric === 'High Score Wins' ? Math.max(...pastScores) : Math.min(...pastScores);
+                if (scoringMetric === 'High Score Wins' && scoreValue > currentBest) {
+                    isNewRecord = true;
+                } else if (scoringMetric === 'Low Score Wins (Time/Penalty)' && scoreValue < currentBest) {
+                    isNewRecord = true;
+                }
             }
 
-            document.getElementById('dart1').value = 0;
-            document.getElementById('dart2').value = 0;
-            document.getElementById('dart3').value = 0;
-            updateUI();
-        }
+            if (isNewRecord) {
+                const banner = document.getElementById('high-score-banner');
+                const bannerText = document.getElementById('banner-text');
+                
+                if (banner && bannerText) {
+                    if (subscoreName) {
+                        bannerText.textContent = `🎯 New Subscore Record! ${athleteName} set a record in ${subscoreName} (${eventName}): ${scoreValue}!`;
+                    } else {
+                        bannerText.textContent = `🌟 New Match Record! ${athleteName} set a new high score for ${eventName}: ${scoreValue}!`;
+                    }
+                    
+                    banner.classList.add('show');
 
-        function advanceClock() {
-            gameState.minute++;
-            if(gameState.homePenaltyMinutes > 0) gameState.homePenaltyMinutes--;
-            if(gameState.visitorPenaltyMinutes > 0) gameState.visitorPenaltyMinutes--;
-
-            if(gameState.minute > gameState.periodLength) {
-                gameState.minute = 1;
-                gameState.period++;
-                logCommentary(`--- PERIOD ${gameState.period - 1} ENDED --- Score: ${gameState.homeName} ${gameState.homeGoals} - ${gameState.visitorGoals} ${gameState.visitorName}`);
-
-                if(gameState.period > 3 && gameState.homeGoals === gameState.visitorGoals) {
-                    logCommentary(`⚠️ Regulation tied! Entering Overtime Period ${gameState.period - 3}!`);
-                } else if(gameState.period > 3 && gameState.homeGoals !== gameState.visitorGoals) {
-                    endMatch();
+                    setTimeout(() => {
+                        banner.classList.remove('show');
+                    }, 4500);
                 }
             }
         }
 
-        function endMatch() {
-            const winner = gameState.homeGoals > gameState.visitorGoals ? gameState.homeName : gameState.visitorName;
-            logCommentary(`🏆 FINAL HORN! Match Over. Winner: ${winner}!`);
-            
-            alert(`Match Over! Winner: ${winner} 🎉\n\nFinal Stats:\n` +
-                  `${gameState.homeName} - Goals: ${gameState.homeGoals} | Shots: ${gameState.homeShots} | Steals: ${gameState.homeSteals} | Assists: ${gameState.homeAssists} | Penalties: ${gameState.homePenalties}\n` +
-                  `${gameState.visitorName} - Goals: ${gameState.visitorGoals} | Shots: ${gameState.visitorShots} | Steals: ${gameState.visitorSteals} | Assists: ${gameState.visitorAssists} | Penalties: ${gameState.visitorPenalties}`);
+        function submitEventScores() {
+            const eventSelect = document.getElementById('event-select');
+            const scoreTypeSelect = document.getElementById('score-type');
+            const dateInput = document.getElementById('event-date');
+            const eventName = eventSelect ? eventSelect.value : '';
+            const scoreType = scoreTypeSelect ? scoreTypeSelect.value : 'high';
+            const eventDate = dateInput && dateInput.value ? dateInput.value : new Date().toISOString();
 
-            gameState.matchStarted = false;
-            document.getElementById('input-section').classList.add('opacity-50', 'pointer-events-none');
-            document.getElementById('submit-btn').disabled = true;
+            if (!eventName) {
+                alert("Please select an event.");
+                return;
+            }
+
+            const results = [];
+            let hasError = false;
+
+            players.forEach(p => {
+                const totalElem = document.querySelector(`.player-score-field[data-player="${p}"]`);
+                const notesElem = document.querySelector(`.player-notes-field[data-player="${p}"]`);
+                const scoreVal = totalElem ? parseFloat(totalElem.value) : NaN;
+                const notesVal = notesElem ? notesElem.value.trim() : '';
+
+                if (isNaN(scoreVal)) {
+                    hasError = true;
+                    return;
+                }
+
+                const subscores = {};
+                if (eventName === "JDC Jr") {
+                    document.querySelectorAll(`.jdc-sub[data-player="${p}"]`).forEach(input => {
+                        subscores[input.placeholder] = parseFloat(input.value) || 0;
+                    });
+                } else if (eventName === "Snapshot") {
+                    document.querySelectorAll(`.snap-sub[data-player="${p}"]`).forEach(input => {
+                        subscores[input.placeholder] = parseFloat(input.value) || 0;
+                    });
+                } else if (eventName === "Shove a Penny") {
+                    document.querySelectorAll(`.shove-sub[data-player="${p}"]`).forEach(input => {
+                        subscores[input.placeholder] = parseFloat(input.value) || 0;
+                    });
+                }
+
+                results.push({ name: p, score: scoreVal, subscores: subscores, notes: notesVal });
+            });
+
+            if (hasError || results.length === 0) {
+                alert("Please enter valid numerical scores for all players.");
+                return;
+            }
+
+            if (scoreType === 'low') {
+                results.sort((a, b) => a.score - b.score);
+            } else {
+                results.sort((a, b) => b.score - a.score);
+            }
+
+            results.forEach((res, idx) => {
+                if (idx > 0 && res.score === results[idx - 1].score) {
+                    res.rank = results[idx - 1].rank;
+                } else {
+                    res.rank = idx + 1;
+                }
+                res.points = pointsMap[res.rank] || 10;
+                res.medal = res.rank === 1 ? "🥇" : (res.rank === 2 ? "🥈" : (res.rank === 3 ? "🥉" : ""));
+            });
+
+            // --- CHECK HIGH SCORES AGAINST EXISTING COMPLETED EVENTS FIRST ---
+            const metricLabel = scoreType === 'high' ? 'High Score Wins' : 'Low Score Wins (Time/Penalty)';
+            results.forEach(res => {
+                if (res.subscores && Object.keys(res.subscores).length > 0) {
+                    for (const [subKey, subVal] of Object.entries(res.subscores)) {
+                        if (!isNaN(subVal)) {
+                            checkAndDisplayHighScore(eventName, res.name, subVal, metricLabel, subKey);
+                        }
+                    }
+                }
+                checkAndDisplayHighScore(eventName, res.name, res.score, metricLabel);
+            });
+            // -----------------------------------------------------------------
+
+            const eventRecord = {
+                eventName: eventName,
+                date: eventDate,
+                timestamp: new Date().toISOString(),
+                results: results
+            };
+
+            if (editingIndex !== null) {
+                completedEvents[editingIndex] = eventRecord;
+                editingIndex = null;
+            } else {
+                completedEvents.push(eventRecord);
+            }
+
+            syncLeagueToFirebase();
+            updatePlayerProfiles(eventRecord);
+            updateLeaderboard();
+            renderCompletedEvents();
+
+            if (eventSelect) eventSelect.value = '';
+            renderScoreInputs();
         }
+
+        function editEvent(index) {
+            editingIndex = index;
+            const evt = completedEvents[index];
+            const eventSelect = document.getElementById('event-select');
+            if (eventSelect) eventSelect.value = evt.eventName;
+            const dateInput = document.getElementById('event-date');
+            if (dateInput && (evt.date || evt.timestamp)) {
+                const raw = evt.date || evt.timestamp;
+                dateInput.value = raw.slice(0, 16);
+            }
+            renderScoreInputs(evt);
+        }
+
+        function deleteEvent(index) {
+            if (!confirm("Are you sure you want to delete this event?")) return;
+            completedEvents.splice(index, 1);
+            syncLeagueToFirebase();
+            updateLeaderboard();
+            renderCompletedEvents();
+        }
+
+        function updateLeaderboard() {
+            const totals = {};
+            completedEvents.forEach(evt => {
+                const rankCounts = {};
+                evt.results.forEach(res => {
+                    rankCounts[res.rank] = (rankCounts[res.rank] || 0) + 1;
+                });
+                evt.results.forEach(res => {
+                    if (!totals[res.name]) {
+                        totals[res.name] = { points: 0, wins: 0, losses: 0, ties: 0 };
+                    }
+                    totals[res.name].points += res.points || 0;
+                    const isTie = rankCounts[res.rank] > 1;
+                    if (isTie && res.rank === 1) {
+                        totals[res.name].ties++;
+                    } else if (res.rank === 1) {
+                        totals[res.name].wins++;
+                    } else {
+                        totals[res.name].losses++;
+                    }
+                });
+            });
+
+            const leaderboardData = Object.keys(totals).map(name => ({
+                name: name,
+                points: totals[name].points,
+                wins: totals[name].wins,
+                losses: totals[name].losses,
+                ties: totals[name].ties
+            }));
+
+            leaderboardData.sort((a, b) => b.points - a.points);
+
+            const tbody = document.getElementById('leaderboard-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            leaderboardData.forEach((player, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td>
+                        <a href="#" onclick="showPlayerProfile('${player.name}'); return false;" style="color: var(--gold); font-weight: bold; text-decoration: underline; cursor: pointer;">
+                            ${player.name}
+                        </a>
+                    </td>
+                    <td><strong>${player.points}</strong></td>
+                    <td>${player.wins}</td>
+                    <td>${player.losses}</td>
+                    <td>${player.ties}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderCompletedEvents() {
+            const container = document.getElementById('completed-events-log');
+            if (!container) return;
+            if (completedEvents.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No completed events yet.</p>';
+                return;
+            }
+
+            const grouped = {};
+            [...completedEvents].reverse().forEach((evt, revIdx) => {
+                const actualIdx = completedEvents.length - 1 - revIdx;
+                const rawDate = evt.date || evt.timestamp;
+                const dateKey = rawDate ? new Date(rawDate).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
+                const gameName = evt.eventName || 'Unnamed Event';
+
+                if (!grouped[dateKey]) grouped[dateKey] = {};
+                if (!grouped[dateKey][gameName]) grouped[dateKey][gameName] = [];
+                grouped[dateKey][gameName].push({ event: evt, actualIdx: actualIdx });
+            });
+
+            let html = '';
+            let dateGroupIdx = 0;
+            for (const [dateStr, gamesObj] of Object.entries(grouped)) {
+                dateGroupIdx++;
+                const totalMatchesForDate = Object.values(gamesObj).reduce((sum, list) => sum + list.length, 0);
+                html += `
+                    <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+                        <div onclick="const el = document.getElementById('date-group-${dateGroupIdx}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';" style="padding: 12px 16px; background: #252525; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                            <div>
+                                <strong style="color: var(--gold); font-size: 1.05em;">📅 ${dateStr}</strong>
+                                <span style="margin-left: 10px; color: var(--text-muted); font-size: 0.85em;">(${totalMatchesForDate} ${totalMatchesForDate === 1 ? 'match' : 'matches'})</span>
+                            </div>
+                            <span style="color: var(--text-muted);">▼</span>
+                        </div>
+                        <div id="date-group-${dateGroupIdx}" style="display: none; padding: 10px; background: #1a1a1a;">
+                `;
+
+                let gameGroupIdx = 0;
+                for (const [gameName, matchEntries] of Object.entries(gamesObj)) {
+                    gameGroupIdx++;
+                    html += `
+                        <div style="border: 1px solid #333; border-radius: 6px; margin-bottom: 8px; background: #222; overflow: hidden;">
+                            <div onclick="const el = document.getElementById('game-group-${dateGroupIdx}-${gameGroupIdx}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';" style="padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; background: #2a2a2a;">
+                                <div>
+                                    <strong style="color: var(--accent-color);">🎯 ${gameName}</strong>
+                    `;
+
+                    const hasNotes = matchEntries.some(({ event: evt }) => evt.results && evt.results.some(r => r.notes && r.notes.trim() !== ''));
+                    if (hasNotes) {
+                        html += `<span style="color: #00bcd4; margin-left: 4px;" title="Contains text notes">●</span>`;
+                    }
+
+                    html += `
+                                    <span style="margin-left: 8px; color: var(--text-muted); font-size: 0.85em;">(${matchEntries.length} ${matchEntries.length === 1 ? 'game' : 'games'})</span>
+                                </div>
+                                <span style="color: var(--text-muted); font-size: 0.85em;">▼</span>
+                            </div>
+                            <div id="game-group-${dateGroupIdx}-${gameGroupIdx}" style="display: none; padding: 8px 12px; background: #181818; border-top: 1px solid #333;">
+                    `;
+
+                    matchEntries.forEach(({ event: evt, actualIdx }) => {
+                        const rawTime = evt.date || evt.timestamp;
+                        const timeStr = rawTime ? new Date(rawTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                        html += `
+                            <div style="padding: 8px 0; border-bottom: 1px dashed #333;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="color: var(--text-muted); font-size: 0.85em;">🕒 ${timeStr}</span>
+                                    <div class="event-actions" style="display: flex; gap: 6px;">
+                                        <button style="background: #4caf50; padding: 3px 8px; font-size: 0.8em;" onclick="editEvent(${actualIdx})">✏️ Edit</button>
+                                        <button class="btn-danger" style="padding: 3px 8px; font-size: 0.8em;" onclick="deleteEvent(${actualIdx})">🗑️ Delete</button>
+                                    </div>
+                                </div>
+                                <ul style="margin: 0; padding-left: 20px;">
+                        `;
+
+                        evt.results.forEach(res => {
+                            let subscoresText = '';
+                            if (res.subscores && typeof res.subscores === 'object') {
+                                const subDetails = Object.entries(res.subscores)
+                                    .filter(([_, val]) => val !== '' && val !== null && !isNaN(val))
+                                    .map(([key, val]) => `${key}: ${val}`)
+                                    .join(', ');
+                                if (subDetails) {
+                                    subscoresText = ` <span style="color: var(--text-muted); font-size: 0.85em;">(${subDetails})</span>`;
+                                }
+                            }
+                            let notesText = '';
+                            if (res.notes) {
+                                notesText = `<div style="color: var(--text-muted); font-style: italic; font-size: 0.85em; margin-top: 2px;">💬 Note: ${res.notes}</div>`;
+                            }
+                            html += `
+                                <li style="margin-bottom: 6px; font-size: 0.9em;">
+                                    <strong>${res.rank}. ${res.name}</strong> - <strong>${res.score}</strong> total${subscoresText} <span style="color: var(--gold); font-weight: bold;">(+${res.points || 0} pts)</span>
+                                    ${notesText}
+                                </li>
+                            `;
+                        });
+
+                        html += `</ul></div>`;
+                    });
+
+                    html += `</div></div>`;
+                }
+                html += `</div></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function showPlayerProfile(playerName) {
+            if (!playerName) return;
+            const pName = playerName.trim();
+            const playerRef = doc(db, "players", pName);
+            try {
+                const docSnap = await getDoc(playerRef);
+                if (!docSnap.exists()) {
+                    alert(`No lifetime profile data found for ${pName}.`);
+                    return;
+                }
+                const data = docSnap.data();
+                const rawHistory = data.gameHistory || [];
+                const seenMatches = new Map();
+                rawHistory.forEach(g => {
+                    const rawDate = g.date || g.timestamp || '';
+                    const normalizedDate = rawDate ? rawDate.slice(0, 16) : '';
+                    const normLeague = (g.league || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const normEvent = (g.event || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const matchKey = `${normLeague}_${normEvent}_${g.score}_${g.rank}_${normalizedDate}`;
+                    if (!seenMatches.has(matchKey)) {
+                        seenMatches.set(matchKey, g);
+                    }
+                });
+                const deduplicatedHistory = Array.from(seenMatches.values());
+
+                const leagueStats = {};
+                deduplicatedHistory.forEach(m => {
+                    const leagueName = (m.league || 'General').trim();
+                    const normKey = leagueName.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (!leagueStats[normKey]) {
+                        leagueStats[normKey] = { displayName: leagueName, points: 0, games: 0 };
+                    }
+                    leagueStats[normKey].points += (m.points || 0);
+                    leagueStats[normKey].games += 1;
+                });
+
+                const leagueRanks = [];
+                const leaguesSnapshot = await getDocs(collection(db, "leagues"));
+                leaguesSnapshot.forEach(lDoc => {
+                    const lData = lDoc.data();
+                    if (!lData.completedEvents) return;
+                    const totals = {};
+                    lData.completedEvents.forEach(evt => {
+                        if (!evt.results) return;
+                        evt.results.forEach(res => {
+                            totals[res.name] = (totals[res.name] || 0) + (res.points || 0);
+                        });
+                    });
+                    if (totals[pName] !== undefined) {
+                        const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+                        const rankIdx = sorted.findIndex(([name]) => name === pName);
+                        const normKey = (lData.leagueName || lDoc.id).toLowerCase().replace(/[^a-z0-9]/g, '');
+                        const stats = leagueStats[normKey] || { points: totals[pName], games: 0 };
+                        if (rankIdx !== -1) {
+                            leagueRanks.push({
+                                displayName: lData.leagueName || lDoc.id,
+                                rank: rankIdx + 1,
+                                points: stats.points,
+                                games: stats.games
+                            });
+                        }
+                    }
+                });
+
+                const leagueRanksHtml = leagueRanks.length > 0 ? leagueRanks.map(l => `
+                    <div style="background: var(--input-bg); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); flex: 1; min-width: 140px;">
+                        <div style="font-size: 0.85em; color: var(--text-muted);">${l.displayName}</div>
+                        <div style="font-size: 1.1em; font-weight: bold; color: var(--gold);">
+                            Rank #${l.rank} <span style="font-size: 0.85em; font-weight: normal; color: var(--text-color);">(${l.points} pts | ${l.games} games)</span>
+                        </div>
+                    </div>
+                `).join('') : '<p style="color: var(--text-muted); font-size: 0.9em;">No active league standings.</p>';
+
+                const gameStats = {};
+                let cleanLifetimePoints = 0;
+                let cleanLifetimeWins = 0;
+                let cleanLifetimeLosses = 0;
+                let cleanLifetimeTies = 0;
+
+                deduplicatedHistory.forEach(g => {
+                    const gName = g.event;
+                    if (!gameStats[gName]) {
+                        gameStats[gName] = { wins: 0, losses: 0, ties: 0, totalPoints: 0, matches: [] };
+                    }
+                    const isTie = Boolean(g.isTie);
+                    if (isTie) {
+                        gameStats[gName].ties++;
+                        cleanLifetimeTies++;
+                    } else if (g.rank === 1) {
+                        gameStats[gName].wins++;
+                        cleanLifetimeWins++;
+                    } else if (g.rank > 1) {
+                        gameStats[gName].losses++;
+                        cleanLifetimeLosses++;
+                    }
+                    const pts = (g.points || 0);
+                    gameStats[gName].totalPoints += pts;
+                    cleanLifetimePoints += pts;
+                    gameStats[gName].matches.push(g);
+                });
+
+                let gameAccordionHtml = Object.entries(gameStats).map(([gameName, stats], idx) => {
+                    const matchesHtml = stats.matches.map(m => {
+                        const subDetails = m.subscores && Object.keys(m.subscores).length > 0 ? ` (${Object.entries(m.subscores).map(([k, v]) => `${k}:${v}`).join(', ')})` : '';
+                        const dateStr = m.date ? new Date(m.date).toLocaleDateString() : '';
+                        const notesHtml = m.notes ? `<div style="color: var(--text-muted); font-style: italic; font-size: 0.85em; margin-top: 2px;">💬 Note: ${m.notes}</div>` : '';
+                        return `
+                            <div style="padding: 6px 0; border-bottom: 1px solid #333; font-size: 0.88em;">
+                                <strong>[${m.league}]</strong> Score: <strong>${m.score}</strong>${subDetails} | Rank #${m.rank} <span style="color: var(--gold);">(+${m.points} pts)</span>
+                                <span style="color: var(--text-muted); float: right;">${dateStr}</span>
+                                ${notesHtml}
+                            </div>
+                        `;
+                    }).reverse().join('');
+
+                    return `
+                        <div style="background: #252525; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 8px; overflow: hidden;">
+                            <div onclick="const el = document.getElementById('game-details-${idx}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';" style="padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                                <div>
+                                    <strong style="color: var(--gold); font-size: 1.05em;">🎯 ${gameName}</strong>
+                                    <span style="margin-left: 10px; font-size: 0.85em; color: var(--text-muted);">(${stats.matches.length} played)</span>
+                                </div>
+                                <div style="font-size: 0.9em;">
+                                    <strong>${stats.wins}W - ${stats.losses}L - ${stats.ties}T</strong>
+                                    <span style="color: var(--accent-color); margin-left: 8px;">(+${stats.totalPoints} pts)</span>
+                                    <span style="margin-left: 8px; color: var(--text-muted);">▼</span>
+                                </div>
+                            </div>
+                            <div id="game-details-${idx}" style="display: none; padding: 10px 14px; background: #1a1a1a; border-top: 1px solid var(--border-color);">
+                                ${matchesHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const modalHtml = `
+                    <div id="player-modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+                        <div style="background: var(--card-bg); padding: 25px; border-radius: 8px; max-width: 580px; width: 90%; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color); position: relative;">
+                            <button onclick="document.getElementById('player-modal-overlay').remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: white; font-size: 1.3em; cursor: pointer;">✖</button>
+                            <h2 style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">👤 ${data.name}'s Profile</h2>
+                            <p style="margin-top: 0; color: var(--text-muted); font-size: 0.95em;">
+                                <strong>Lifetime Points:</strong> ${cleanLifetimePoints} &nbsp;|&nbsp; <strong>Career Record:</strong> ${cleanLifetimeWins}W - ${cleanLifetimeLosses}L - ${cleanLifetimeTies}T
+                            </p>
+                            <h3 style="color: var(--accent-color); font-size: 1em; margin-top: 18px; margin-bottom: 8px;">🏆 League Standings</h3>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px;">
+                                ${leagueRanksHtml}
+                            </div>
+                            <hr style="border-color: var(--border-color); margin: 15px 0;">
+                            <h3 style="color: var(--accent-color); font-size: 1em; margin-bottom: 10px;">📊 Game Breakdown & Match History</h3>
+                            <div>
+                                ${gameAccordionHtml || '<p style="color: var(--text-muted);">No recorded game history.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const oldModal = document.getElementById('player-modal-overlay');
+                if (oldModal) oldModal.remove();
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            } catch (err) {
+                console.error("Error fetching player profile:", err);
+                alert("Failed to load player profile.");
+            }
+        }
+
+        // Window exposures for inline button listeners
+        window.addPlayer = addPlayer;
+        window.removePlayer = removePlayer;
+        window.addEvent = addEvent;
+        window.removeEvent = removeEvent;
+        window.setActiveLeague = setActiveLeague;
+        window.loadSelectedLeague = loadSelectedLeague;
+        window.deleteCurrentLeague = deleteCurrentLeague;
+        window.submitEventScores = submitEventScores;
+        window.editEvent = editEvent;
+        window.deleteEvent = deleteEvent;
+        window.renderScoreInputs = renderScoreInputs;
+        window.showPlayerProfile = showPlayerProfile;
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', async () => {
+            setNowDate();
+            await fetchSavedLeagues();
+            await loadSelectedLeague();
+        });
     </script>
 </body>
 </html>
