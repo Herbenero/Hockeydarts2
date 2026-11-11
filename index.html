@@ -20,6 +20,7 @@
             --silver: #c0c0c0;
             --bronze: #cd7f32;
         }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
@@ -36,8 +37,17 @@
             align-items: center;
             min-height: 100vh;
         }
-        .container { max-width: 900px; width: 100%; }
-        h1, h2, h3 { text-align: center; color: var(--gold); }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: var(--gold);
+        }
+
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
@@ -47,9 +57,27 @@
             border: 1px solid var(--border-color);
             position: relative;
         }
-        .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 200px; display: flex; flex-direction: column; }
-        label { font-size: 0.9em; margin-bottom: 5px; color: var(--text-muted); }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+
         input, select, button {
             padding: 10px;
             border-radius: 4px;
@@ -58,7 +86,12 @@
             color: var(--text-color);
             font-size: 1em;
         }
-        input:focus, select:focus { outline: none; border-color: var(--accent-color); }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
         button {
             background-color: var(--accent-color);
             color: white;
@@ -67,10 +100,26 @@
             border: none;
             transition: background 0.2s;
         }
-        button:hover { background-color: var(--accent-hover); }
-        .btn-danger { background-color: var(--danger-color); }
-        .btn-danger:hover { background-color: var(--danger-hover); }
-        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
         .tag {
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
@@ -81,13 +130,37 @@
             align-items: center;
             gap: 6px;
         }
-        .tag button { background: none; border: none; color: #ff5555; padding: 0; font-size: 1.1em; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        th { background-color: var(--input-bg); color: var(--gold); }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: #ff5555;
+            padding: 0;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--input-bg);
+            color: var(--gold);
+        }
+
         tr:nth-child(1) td:first-child { color: var(--gold); font-weight: bold; }
         tr:nth-child(2) td:first-child { color: var(--silver); font-weight: bold; }
         tr:nth-child(3) td:first-child { color: var(--bronze); font-weight: bold; }
+
         #current-league-header {
             text-align: center;
             font-size: 1.1em;
@@ -99,6 +172,7 @@
             align-items: center;
             gap: 15px;
         }
+
         #high-score-banner {
             display: none;
             position: fixed;
@@ -117,6 +191,7 @@
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
         #high-score-banner.show {
             transform: translateX(-50%) translateY(0);
             opacity: 1;
@@ -150,11 +225,17 @@
                     </div>
                 </div>
             </div>
+
             <div id="current-league-header">
                 <span>Current Active League: <strong id="current-league-text">Hellcastle Archery League</strong></span>
-                <button class="btn-danger" style="padding: 4px 10px; font-size: 0.85em;" onclick="deleteCurrentLeague()">🗑️ Delete League</button>
+                <div style="display: flex; gap: 8px;">
+                    <button style="background: var(--gold); color: #000; padding: 4px 10px; font-size: 0.85em;" onclick="showLeagueRecords()">🏆 Records</button>
+                    <button class="btn-danger" style="padding: 4px 10px; font-size: 0.85em;" onclick="deleteCurrentLeague()">🗑️ Delete League</button>
+                </div>
             </div>
+
             <hr style="border-color: var(--border-color); margin: 20px 0;">
+
             <div class="form-row">
                 <div class="form-group">
                     <label>Add Combatant / Player Name</label>
@@ -282,14 +363,109 @@
             }
         }
 
+        // --- Records Modal Logic ---
+        function showLeagueRecords() {
+            if (!completedEvents || completedEvents.length === 0) {
+                alert("No completed events recorded in this league yet.");
+                return;
+            }
+
+            const gameRecords = {};
+
+            completedEvents.forEach(evt => {
+                const gameName = evt.eventName || "Unknown Game";
+
+                if (!gameRecords[gameName]) {
+                    gameRecords[gameName] = {
+                        highScore: null,
+                        recordHolders: [],
+                        subscoreRecords: {}
+                    };
+                }
+
+                if (evt.results && Array.isArray(evt.results)) {
+                    evt.results.forEach(res => {
+                        if (res.score !== undefined && !isNaN(res.score)) {
+                            const scoreNum = Number(res.score);
+                            const currentRecord = gameRecords[gameName].highScore;
+
+                            if (currentRecord === null || scoreNum > currentRecord.score) {
+                                gameRecords[gameName].highScore = { score: scoreNum, name: res.name };
+                                gameRecords[gameName].recordHolders = [res.name];
+                            } else if (scoreNum === currentRecord.score) {
+                                if (!gameRecords[gameName].recordHolders.includes(res.name)) {
+                                    gameRecords[gameName].recordHolders.push(res.name);
+                                }
+                            }
+                        }
+
+                        if (res.subscores && typeof res.subscores === 'object') {
+                            for (const [subKey, subVal] of Object.entries(res.subscores)) {
+                                if (subVal !== '' && !isNaN(subVal)) {
+                                    const numVal = Number(subVal);
+                                    if (!gameRecords[gameName].subscoreRecords[subKey]) {
+                                        gameRecords[gameName].subscoreRecords[subKey] = { score: numVal, holders: [res.name] };
+                                    } else {
+                                        const subRec = gameRecords[gameName].subscoreRecords[subKey];
+                                        if (numVal > subRec.score) {
+                                            gameRecords[gameName].subscoreRecords[subKey] = { score: numVal, holders: [res.name] };
+                                        } else if (numVal === subRec.score && !subRec.holders.includes(res.name)) {
+                                            subRec.holders.push(res.name);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            let recordsHtml = '';
+            for (const [gameName, data] of Object.entries(gameRecords)) {
+                let subscoresHtml = '';
+                if (Object.keys(data.subscoreRecords).length > 0) {
+                    subscoresHtml = '<div style="margin-top: 6px; padding-left: 10px; border-left: 2px solid var(--accent-color); font-size: 0.9em; color: var(--text-muted);">';
+                    for (const [subName, subData] of Object.entries(data.subscoreRecords)) {
+                        subscoresHtml += `<div>🔹 <strong>${subName}:</strong> ${subData.score} (${subData.holders.join(', ')})</div>`;
+                    }
+                    subscoresHtml += '</div>';
+                }
+
+                const holdersText = data.highScore ? `${data.highScore.score} pts — <strong>${data.recordHolders.join(', ')}</strong>` : 'No scores logged yet';
+
+                recordsHtml += `
+                    <div style="background: #252525; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; margin-bottom: 10px;">
+                        <div style="color: var(--gold); font-size: 1.05em; font-weight: bold; margin-bottom: 4px;">🎯 ${gameName}</div>
+                        <div style="font-size: 0.95em;">🏆 High Score: ${holdersText}</div>
+                        ${subscoresHtml}
+                    </div>
+                `;
+            }
+
+            const modalHtml = `
+                <div id="league-records-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+                    <div style="background: var(--card-bg); padding: 25px; border-radius: 8px; max-width: 580px; width: 90%; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color); position: relative;">
+                        <button onclick="document.getElementById('league-records-modal').remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: white; font-size: 1.3em; cursor: pointer;">✖</button>
+                        <h2 style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">🏆 ${currentLeagueName} Records</h2>
+                        <p style="margin-top: 0; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px;">All-time high scores and personal best breakdowns.</p>
+                        <div>
+                            ${recordsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const oldModal = document.getElementById('league-records-modal');
+            if (oldModal) oldModal.remove();
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
         async function updatePlayerProfiles(eventRecord) {
             const rankCounts = {};
             eventRecord.results.forEach(res => {
                 rankCounts[res.rank] = (rankCounts[res.rank] || 0) + 1;
             });
-
             const matchKey = `${currentLeagueName}_${eventRecord.eventName}_${eventRecord.date || eventRecord.timestamp}`.trim().toLowerCase();
-
             for (const res of eventRecord.results) {
                 const playerRef = doc(db, "players", res.name.trim());
                 const isTie = rankCounts[res.rank] > 1;
@@ -305,30 +481,25 @@
                     notes: res.notes || '',
                     date: eventRecord.date || eventRecord.timestamp
                 };
-
                 try {
                     const docSnap = await getDoc(playerRef);
                     let history = [];
                     if (docSnap.exists()) {
                         history = docSnap.data().gameHistory || [];
                     }
-
                     const existingIdx = history.findIndex(h => {
                         const hKey = h.matchId || `${h.league}_${h.event}_${h.date}`.trim().toLowerCase();
                         return hKey === matchKey;
                     });
-
                     if (existingIdx > -1) {
                         history[existingIdx] = newMatchEntry;
                     } else {
                         history.push(newMatchEntry);
                     }
-
                     let lifetimePts = 0;
                     let lifetimeWins = 0;
                     let lifetimeLosses = 0;
                     let lifetimeTies = 0;
-
                     history.forEach(m => {
                         lifetimePts += (m.points || 0);
                         if (m.isTie) {
@@ -339,7 +510,6 @@
                             lifetimeLosses++;
                         }
                     });
-
                     await setDoc(playerRef, {
                         name: res.name.trim(),
                         totalPoints: lifetimePts,
@@ -410,10 +580,8 @@
             if (!leagueName) return;
             currentLeagueName = leagueName;
             document.getElementById('current-league-text').textContent = currentLeagueName;
-
             const sanitizedDocId = getSanitizedDocId(leagueName);
             const leagueRef = doc(db, "leagues", sanitizedDocId);
-
             try {
                 let docSnap = await getDoc(leagueRef);
                 if (!docSnap.exists()) {
@@ -426,14 +594,12 @@
                         }
                     }
                 }
-
                 if (docSnap && docSnap.exists()) {
                     const data = docSnap.data();
                     completedEvents.length = 0;
                     players.length = 0;
                     events.length = 0;
                     editingIndex = null;
-
                     if (data.completedEvents) {
                         completedEvents.push(...data.completedEvents);
                         data.completedEvents.forEach(evt => {
@@ -545,11 +711,9 @@
                 container.innerHTML = '';
                 return;
             }
-
             const isJdcJr = eventName === "JDC Jr";
             const isSnapshot = eventName === "Snapshot";
             const isShoveAPenny = eventName === "Shove a Penny";
-
             let html = '<div style="margin-top: 15px;">';
             players.forEach(p => {
                 let existingScore = '';
@@ -563,7 +727,6 @@
                         existingNotes = match.notes || '';
                     }
                 }
-
                 if (isJdcJr) {
                     const cb = existingSubs["Coloring Book"] !== undefined ? existingSubs["Coloring Book"] : '';
                     const bb = existingSubs["Bit of Bully"] !== undefined ? existingSubs["Bit of Bully"] : '';
@@ -632,7 +795,6 @@
                     `;
                 }
             });
-
             const btnLabel = editingIndex !== null ? 'Update Event Scores' : 'Submit Scores';
             html += `<button onclick="submitEventScores()">${btnLabel}</button></div>`;
             container.innerHTML = html;
@@ -666,9 +828,8 @@
 
         function checkAndDisplayHighScore(eventName, athleteName, scoreValue, scoringMetric, subscoreName = null) {
             let pastScores = [];
-
             completedEvents.forEach((evt, idx) => {
-                if (editingIndex !== null && idx === editingIndex) return; 
+                if (editingIndex !== null && idx === editingIndex) return;
                 if (evt.eventName === eventName && evt.results) {
                     evt.results.forEach(res => {
                         if (subscoreName) {
@@ -683,10 +844,9 @@
                     });
                 }
             });
-
             let isNewRecord = false;
             if (pastScores.length === 0) {
-                isNewRecord = true; 
+                isNewRecord = true;
             } else {
                 let currentBest = scoringMetric === 'High Score Wins' ? Math.max(...pastScores) : Math.min(...pastScores);
                 if (scoringMetric === 'High Score Wins' && scoreValue > currentBest) {
@@ -695,23 +855,17 @@
                     isNewRecord = true;
                 }
             }
-
             if (isNewRecord) {
                 const banner = document.getElementById('high-score-banner');
                 const bannerText = document.getElementById('banner-text');
-                
                 if (banner && bannerText) {
                     if (subscoreName) {
                         bannerText.textContent = `🎯 New Subscore Record! ${athleteName} set a record in ${subscoreName} (${eventName}): ${scoreValue}!`;
                     } else {
                         bannerText.textContent = `🌟 New Match Record! ${athleteName} set a new high score for ${eventName}: ${scoreValue}!`;
                     }
-                    
                     banner.classList.add('show');
-
-                    setTimeout(() => {
-                        banner.classList.remove('show');
-                    }, 4500);
+                    setTimeout(() => { banner.classList.remove('show'); }, 4500);
                 }
             }
         }
@@ -723,26 +877,21 @@
             const eventName = eventSelect ? eventSelect.value : '';
             const scoreType = scoreTypeSelect ? scoreTypeSelect.value : 'high';
             const eventDate = dateInput && dateInput.value ? dateInput.value : new Date().toISOString();
-
             if (!eventName) {
                 alert("Please select an event.");
                 return;
             }
-
             const results = [];
             let hasError = false;
-
             players.forEach(p => {
                 const totalElem = document.querySelector(`.player-score-field[data-player="${p}"]`);
                 const notesElem = document.querySelector(`.player-notes-field[data-player="${p}"]`);
                 const scoreVal = totalElem ? parseFloat(totalElem.value) : NaN;
                 const notesVal = notesElem ? notesElem.value.trim() : '';
-
                 if (isNaN(scoreVal)) {
                     hasError = true;
                     return;
                 }
-
                 const subscores = {};
                 if (eventName === "JDC Jr") {
                     document.querySelectorAll(`.jdc-sub[data-player="${p}"]`).forEach(input => {
@@ -757,21 +906,17 @@
                         subscores[input.placeholder] = parseFloat(input.value) || 0;
                     });
                 }
-
                 results.push({ name: p, score: scoreVal, subscores: subscores, notes: notesVal });
             });
-
             if (hasError || results.length === 0) {
                 alert("Please enter valid numerical scores for all players.");
                 return;
             }
-
             if (scoreType === 'low') {
                 results.sort((a, b) => a.score - b.score);
             } else {
                 results.sort((a, b) => b.score - a.score);
             }
-
             results.forEach((res, idx) => {
                 if (idx > 0 && res.score === results[idx - 1].score) {
                     res.rank = results[idx - 1].rank;
@@ -782,7 +927,6 @@
                 res.medal = res.rank === 1 ? "🥇" : (res.rank === 2 ? "🥈" : (res.rank === 3 ? "🥉" : ""));
             });
 
-            // --- CHECK HIGH SCORES AGAINST EXISTING COMPLETED EVENTS FIRST ---
             const metricLabel = scoreType === 'high' ? 'High Score Wins' : 'Low Score Wins (Time/Penalty)';
             results.forEach(res => {
                 if (res.subscores && Object.keys(res.subscores).length > 0) {
@@ -794,7 +938,6 @@
                 }
                 checkAndDisplayHighScore(eventName, res.name, res.score, metricLabel);
             });
-            // -----------------------------------------------------------------
 
             const eventRecord = {
                 eventName: eventName,
@@ -802,19 +945,16 @@
                 timestamp: new Date().toISOString(),
                 results: results
             };
-
             if (editingIndex !== null) {
                 completedEvents[editingIndex] = eventRecord;
                 editingIndex = null;
             } else {
                 completedEvents.push(eventRecord);
             }
-
             syncLeagueToFirebase();
             updatePlayerProfiles(eventRecord);
             updateLeaderboard();
             renderCompletedEvents();
-
             if (eventSelect) eventSelect.value = '';
             renderScoreInputs();
         }
@@ -862,7 +1002,6 @@
                     }
                 });
             });
-
             const leaderboardData = Object.keys(totals).map(name => ({
                 name: name,
                 points: totals[name].points,
@@ -870,9 +1009,7 @@
                 losses: totals[name].losses,
                 ties: totals[name].ties
             }));
-
             leaderboardData.sort((a, b) => b.points - a.points);
-
             const tbody = document.getElementById('leaderboard-body');
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -901,19 +1038,16 @@
                 container.innerHTML = '<p style="color: var(--text-muted);">No completed events yet.</p>';
                 return;
             }
-
             const grouped = {};
             [...completedEvents].reverse().forEach((evt, revIdx) => {
                 const actualIdx = completedEvents.length - 1 - revIdx;
                 const rawDate = evt.date || evt.timestamp;
                 const dateKey = rawDate ? new Date(rawDate).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
                 const gameName = evt.eventName || 'Unnamed Event';
-
                 if (!grouped[dateKey]) grouped[dateKey] = {};
                 if (!grouped[dateKey][gameName]) grouped[dateKey][gameName] = [];
                 grouped[dateKey][gameName].push({ event: evt, actualIdx: actualIdx });
             });
-
             let html = '';
             let dateGroupIdx = 0;
             for (const [dateStr, gamesObj] of Object.entries(grouped)) {
@@ -930,7 +1064,6 @@
                         </div>
                         <div id="date-group-${dateGroupIdx}" style="display: none; padding: 10px; background: #1a1a1a;">
                 `;
-
                 let gameGroupIdx = 0;
                 for (const [gameName, matchEntries] of Object.entries(gamesObj)) {
                     gameGroupIdx++;
@@ -940,12 +1073,10 @@
                                 <div>
                                     <strong style="color: var(--accent-color);">🎯 ${gameName}</strong>
                     `;
-
                     const hasNotes = matchEntries.some(({ event: evt }) => evt.results && evt.results.some(r => r.notes && r.notes.trim() !== ''));
                     if (hasNotes) {
                         html += `<span style="color: #00bcd4; margin-left: 4px;" title="Contains text notes">●</span>`;
                     }
-
                     html += `
                                     <span style="margin-left: 8px; color: var(--text-muted); font-size: 0.85em;">(${matchEntries.length} ${matchEntries.length === 1 ? 'game' : 'games'})</span>
                                 </div>
@@ -953,7 +1084,6 @@
                             </div>
                             <div id="game-group-${dateGroupIdx}-${gameGroupIdx}" style="display: none; padding: 8px 12px; background: #181818; border-top: 1px solid #333;">
                     `;
-
                     matchEntries.forEach(({ event: evt, actualIdx }) => {
                         const rawTime = evt.date || evt.timestamp;
                         const timeStr = rawTime ? new Date(rawTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -968,7 +1098,6 @@
                                 </div>
                                 <ul style="margin: 0; padding-left: 20px;">
                         `;
-
                         evt.results.forEach(res => {
                             let subscoresText = '';
                             if (res.subscores && typeof res.subscores === 'object') {
@@ -986,15 +1115,12 @@
                             }
                             html += `
                                 <li style="margin-bottom: 6px; font-size: 0.9em;">
-                                    <strong>${res.rank}. ${res.name}</strong> - <strong>${res.score}</strong> total${subscoresText} <span style="color: var(--gold); font-weight: bold;">(+${res.points || 0} pts)</span>
-                                    ${notesText}
+                                    <strong>${res.rank}. ${res.name}</strong> - <strong>${res.score}</strong> total${subscoresText} <span style="color: var(--gold); font-weight: bold;">(+${res.points || 0} pts)</span> ${notesText}
                                 </li>
                             `;
                         });
-
                         html += `</ul></div>`;
                     });
-
                     html += `</div></div>`;
                 }
                 html += `</div></div>`;
@@ -1026,7 +1152,6 @@
                     }
                 });
                 const deduplicatedHistory = Array.from(seenMatches.values());
-
                 const leagueStats = {};
                 deduplicatedHistory.forEach(m => {
                     const leagueName = (m.league || 'General').trim();
@@ -1037,7 +1162,6 @@
                     leagueStats[normKey].points += (m.points || 0);
                     leagueStats[normKey].games += 1;
                 });
-
                 const leagueRanks = [];
                 const leaguesSnapshot = await getDocs(collection(db, "leagues"));
                 leaguesSnapshot.forEach(lDoc => {
@@ -1065,7 +1189,6 @@
                         }
                     }
                 });
-
                 const leagueRanksHtml = leagueRanks.length > 0 ? leagueRanks.map(l => `
                     <div style="background: var(--input-bg); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); flex: 1; min-width: 140px;">
                         <div style="font-size: 0.85em; color: var(--text-muted);">${l.displayName}</div>
@@ -1080,7 +1203,6 @@
                 let cleanLifetimeWins = 0;
                 let cleanLifetimeLosses = 0;
                 let cleanLifetimeTies = 0;
-
                 deduplicatedHistory.forEach(g => {
                     const gName = g.event;
                     if (!gameStats[gName]) {
@@ -1110,13 +1232,11 @@
                         const notesHtml = m.notes ? `<div style="color: var(--text-muted); font-style: italic; font-size: 0.85em; margin-top: 2px;">💬 Note: ${m.notes}</div>` : '';
                         return `
                             <div style="padding: 6px 0; border-bottom: 1px solid #333; font-size: 0.88em;">
-                                <strong>[${m.league}]</strong> Score: <strong>${m.score}</strong>${subDetails} | Rank #${m.rank} <span style="color: var(--gold);">(+${m.points} pts)</span>
-                                <span style="color: var(--text-muted); float: right;">${dateStr}</span>
+                                <strong>[${m.league}]</strong> Score: <strong>${m.score}</strong>${subDetails} | Rank #${m.rank} <span style="color: var(--gold);">(+${m.points} pts)</span> <span style="color: var(--text-muted); float: right;">${dateStr}</span>
                                 ${notesHtml}
                             </div>
                         `;
                     }).reverse().join('');
-
                     return `
                         <div style="background: #252525; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 8px; overflow: hidden;">
                             <div onclick="const el = document.getElementById('game-details-${idx}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';" style="padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
@@ -1157,7 +1277,6 @@
                         </div>
                     </div>
                 `;
-
                 const oldModal = document.getElementById('player-modal-overlay');
                 if (oldModal) oldModal.remove();
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
@@ -1167,7 +1286,7 @@
             }
         }
 
-        // Window exposures for inline button listeners
+        // Window exposures
         window.addPlayer = addPlayer;
         window.removePlayer = removePlayer;
         window.addEvent = addEvent;
@@ -1180,6 +1299,7 @@
         window.deleteEvent = deleteEvent;
         window.renderScoreInputs = renderScoreInputs;
         window.showPlayerProfile = showPlayerProfile;
+        window.showLeagueRecords = showLeagueRecords;
 
         // Initialization
         window.addEventListener('DOMContentLoaded', async () => {
