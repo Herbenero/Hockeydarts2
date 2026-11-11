@@ -363,124 +363,144 @@
             }
         }
 
-        // --- Records Modal Logic ---
-        function showLeagueRecords() {
-            if (!completedEvents || completedEvents.length === 0) {
-                alert("No completed events recorded in this league yet.");
-                return;
-            }
+       // --- Records Modal Logic ---
+function showLeagueRecords() {
+    if (!completedEvents || completedEvents.length === 0) {
+        alert("No completed events recorded in this league yet.");
+        return;
+    }
+    
+    const gameRecords = {};
+    
+    completedEvents.forEach(evt => {
+        const gameName = evt.eventName || "Unknown Game";
+        const lowerGameName = gameName.trim().toLowerCase();
+        const eventDateRaw = evt.date || evt.timestamp || '';
+        const eventDateStr = eventDateRaw ? new Date(eventDateRaw).toLocaleDateString(undefined, { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        }) : '';
 
-            const gameRecords = {};
+        // Check if this game tracks lowest score as best record
+        const isLowScoreGame = (lowerGameName === "301" || lowerGameName === "golf");
 
-            completedEvents.forEach(evt => {
-                const gameName = evt.eventName || "Unknown Game";
-                const lowerGameName = gameName.trim().toLowerCase();
-                // Check if this game tracks lowest score as best record
-                const isLowScoreGame = (lowerGameName === "301" || lowerGameName === "golf");
-
-                if (!gameRecords[gameName]) {
-                    gameRecords[gameName] = {
-                        bestScore: null,
-                        recordHolders: [],
-                        subscoreRecords: {},
-                        isLowScore: isLowScoreGame
-                    };
-                }
-
-                if (evt.results && Array.isArray(evt.results)) {
-                    evt.results.forEach(res => {
-                        if (res.score !== undefined && !isNaN(res.score)) {
-                            const scoreNum = Number(res.score);
-                            const currentRecord = gameRecords[gameName].bestScore;
-
-                            if (currentRecord === null) {
-                                gameRecords[gameName].bestScore = scoreNum;
-                                gameRecords[gameName].recordHolders = [res.name];
-                            } else {
-                                if (isLowScoreGame) {
-                                    if (scoreNum < currentRecord) {
-                                        gameRecords[gameName].bestScore = scoreNum;
-                                        gameRecords[gameName].recordHolders = [res.name];
-                                    } else if (scoreNum === currentRecord) {
-                                        if (!gameRecords[gameName].recordHolders.includes(res.name)) {
-                                            gameRecords[gameName].recordHolders.push(res.name);
-                                        }
-                                    }
-                                } else {
-                                    if (scoreNum > currentRecord) {
-                                        gameRecords[gameName].bestScore = scoreNum;
-                                        gameRecords[gameName].recordHolders = [res.name];
-                                    } else if (scoreNum === currentRecord) {
-                                        if (!gameRecords[gameName].recordHolders.includes(res.name)) {
-                                            gameRecords[gameName].recordHolders.push(res.name);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (res.subscores && typeof res.subscores === 'object') {
-                            for (const [subKey, subVal] of Object.entries(res.subscores)) {
-                                if (subVal !== '' && !isNaN(subVal)) {
-                                    const numVal = Number(subVal);
-                                    if (!gameRecords[gameName].subscoreRecords[subKey]) {
-                                        gameRecords[gameName].subscoreRecords[subKey] = { score: numVal, holders: [res.name] };
-                                    } else {
-                                        const subRec = gameRecords[gameName].subscoreRecords[subKey];
-                                        if (numVal > subRec.score) {
-                                            gameRecords[gameName].subscoreRecords[subKey] = { score: numVal, holders: [res.name] };
-                                        } else if (numVal === subRec.score && !subRec.holders.includes(res.name)) {
-                                            subRec.holders.push(res.name);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            });
-
-            let recordsHtml = '';
-            for (const [gameName, data] of Object.entries(gameRecords)) {
-                let subscoresHtml = '';
-                if (Object.keys(data.subscoreRecords).length > 0) {
-                    subscoresHtml = '<div style="margin-top: 6px; padding-left: 10px; border-left: 2px solid var(--accent-color); font-size: 0.9em; color: var(--text-muted);">';
-                    for (const [subName, subData] of Object.entries(data.subscoreRecords)) {
-                        subscoresHtml += `<div>🔹 <strong>${subName}:</strong> ${subData.score} (${subData.holders.join(', ')})</div>`;
-                    }
-                    subscoresHtml += '</div>';
-                }
-
-                const labelType = data.isLowScore ? 'Best Low Score' : 'High Score';
-                const holdersText = data.bestScore !== null ? `${data.bestScore} pts — <strong>${data.recordHolders.join(', ')}</strong>` : 'No scores logged yet';
-
-                recordsHtml += `
-                    <div style="background: #252525; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; margin-bottom: 10px;">
-                        <div style="color: var(--gold); font-size: 1.05em; font-weight: bold; margin-bottom: 4px;">🎯 ${gameName}</div>
-                        <div style="font-size: 0.95em;">🏆 ${labelType}: ${holdersText}</div>
-                        ${subscoresHtml}
-                    </div>
-                `;
-            }
-
-            const modalHtml = `
-                <div id="league-records-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000;">
-                    <div style="background: var(--card-bg); padding: 25px; border-radius: 8px; max-width: 580px; width: 90%; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color); position: relative;">
-                        <button onclick="document.getElementById('league-records-modal').remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: white; font-size: 1.3em; cursor: pointer;">✖</button>
-                        <h2 style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">🏆 ${currentLeagueName} Records</h2>
-                        <p style="margin-top: 0; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px;">All-time records and personal best breakdowns.</p>
-                        <div>
-                            ${recordsHtml}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            const oldModal = document.getElementById('league-records-modal');
-            if (oldModal) oldModal.remove();
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        if (!gameRecords[gameName]) {
+            gameRecords[gameName] = { 
+                bestScore: null, 
+                recordHolders: [], 
+                recordDate: '', 
+                subscoreRecords: {}, 
+                isLowScore: isLowScoreGame 
+            };
         }
 
+        if (evt.results && Array.isArray(evt.results)) {
+            evt.results.forEach(res => {
+                if (res.score !== undefined && !isNaN(res.score)) {
+                    const scoreNum = Number(res.score);
+                    const currentRecord = gameRecords[gameName].bestScore;
+
+                    if (currentRecord === null) {
+                        gameRecords[gameName].bestScore = scoreNum;
+                        gameRecords[gameName].recordHolders = [res.name];
+                        gameRecords[gameName].recordDate = eventDateStr;
+                    } else {
+                        if (isLowScoreGame) {
+                            if (scoreNum < currentRecord) {
+                                gameRecords[gameName].bestScore = scoreNum;
+                                gameRecords[gameName].recordHolders = [res.name];
+                                gameRecords[gameName].recordDate = eventDateStr;
+                            } else if (scoreNum === currentRecord) {
+                                if (!gameRecords[gameName].recordHolders.includes(res.name)) {
+                                    gameRecords[gameName].recordHolders.push(res.name);
+                                }
+                            }
+                        } else {
+                            if (scoreNum > currentRecord) {
+                                gameRecords[gameName].bestScore = scoreNum;
+                                gameRecords[gameName].recordHolders = [res.name];
+                                gameRecords[gameName].recordDate = eventDateStr;
+                            } else if (scoreNum === currentRecord) {
+                                if (!gameRecords[gameName].recordHolders.includes(res.name)) {
+                                    gameRecords[gameName].recordHolders.push(res.name);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (res.subscores && typeof res.subscores === 'object') {
+                    for (const [subKey, subVal] of Object.entries(res.subscores)) {
+                        if (subVal !== '' && !isNaN(subVal)) {
+                            const numVal = Number(subVal);
+                            if (!gameRecords[gameName].subscoreRecords[subKey]) {
+                                gameRecords[gameName].subscoreRecords[subKey] = { 
+                                    score: numVal, 
+                                    holders: [res.name], 
+                                    date: eventDateStr 
+                                };
+                            } else {
+                                const subRec = gameRecords[gameName].subscoreRecords[subKey];
+                                if (numVal > subRec.score) {
+                                    gameRecords[gameName].subscoreRecords[subKey] = { 
+                                        score: numVal, 
+                                        holders: [res.name], 
+                                        date: eventDateStr 
+                                    };
+                                } else if (numVal === subRec.score && !subRec.holders.includes(res.name)) {
+                                    subRec.holders.push(res.name);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    let recordsHtml = '';
+    for (const [gameName, data] of Object.entries(gameRecords)) {
+        let subscoresHtml = '';
+        if (Object.keys(data.subscoreRecords).length > 0) {
+            subscoresHtml = '<div style="margin-top: 6px; padding-left: 10px; border-left: 2px solid var(--accent-color); font-size: 0.9em; color: var(--text-muted);">';
+            for (const [subName, subData] of Object.entries(data.subscoreRecords)) {
+                const subDateText = subData.date ? ` <span style="font-size: 0.85em; color: var(--text-muted);">(${subData.date})</span>` : '';
+                subscoresHtml += `<div>🔹 <strong>${subName}:</strong> ${subData.score} (${subData.holders.join(', ')})${subDateText}</div>`;
+            }
+            subscoresHtml += '</div>';
+        }
+
+        const labelType = data.isLowScore ? 'Best Low Score' : 'High Score';
+        const dateText = data.recordDate ? ` <span style="font-size: 0.85em; color: var(--text-muted);">(${data.recordDate})</span>` : '';
+        const holdersText = data.bestScore !== null ? `${data.bestScore} pts — <strong>${data.recordHolders.join(', ')}</strong>${dateText}` : 'No scores logged yet';
+
+        recordsHtml += `
+            <div style="background: #252525; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; margin-bottom: 10px;">
+                <div style="color: var(--gold); font-size: 1.05em; font-weight: bold; margin-bottom: 4px;">🎯 ${gameName}</div>
+                <div style="font-size: 0.95em;">🏆 ${labelType}: ${holdersText}</div>
+                ${subscoresHtml}
+            </div>
+        `;
+    }
+
+    const modalHtml = `
+        <div id="league-records-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+            <div style="background: var(--card-bg); padding: 25px; border-radius: 8px; max-width: 580px; width: 90%; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color); position: relative;">
+                <button onclick="document.getElementById('league-records-modal').remove()" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: white; font-size: 1.3em; cursor: pointer;">✖</button>
+                <h2 style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">🏆 ${currentLeagueName} Records</h2>
+                <p style="margin-top: 0; color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px;">All-time records and personal best breakdowns.</p>
+                <div>
+                    ${recordsHtml}
+                </div>
+            </div>
+        </div>
+    `;
+
+    const oldModal = document.getElementById('league-records-modal');
+    if (oldModal) oldModal.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
         async function updatePlayerProfiles(eventRecord) {
             const rankCounts = {};
             eventRecord.results.forEach(res => {
